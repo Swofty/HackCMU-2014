@@ -60,7 +60,7 @@ package
 			
 			player = new Player(100, 100);
 			
-			fib = new RoomLayout("fib");
+			fib = new RoomLayout("fact");
 			fib.addParam("x");
 			
 			var c:Constant = new Constant("int", 5, 1 * TILEWIDTH, 1 * TILEHEIGHT);

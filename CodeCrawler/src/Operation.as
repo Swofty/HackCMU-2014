@@ -2,6 +2,7 @@ package
 {
 	import flash.display.InterpolationMethod;
 	import flash.utils; //added
+	import mx.formatters.StringFormatter;
 	
 	/**
 	 * ...
@@ -9,95 +10,47 @@ package
 	 */
 	public class Operation extends Item 
 	{
-		public var arg1_type:String;
-		public var arg2_type:String;
+		public var left_arg:Constant;
+		public var left_label:String;
+		public var right_arg:Constant;
+		public var right_label:String;
+		public var op:String;
 		public var applied_fun:Function;
-		public var return_item:Item;
-		public var numArgsDict:Dictionary;
-		public var functionMap:Dictionary;
+		public var return_item:Constant;
 		
-		public function Operation(operation:String)
+		public function Operation(operation:String, x:int, y:int)
 		{
-			//we get the binary operator
-			/*
-			binary_operator:String;
-			arg1:String;
-			arg2:String;
-			*/
-			numArgsDict = new Dictionary();
-			numArgsDict["return"] = 1;
-			numArgsDict["call"] = 2;
-			numArgsDict["add"] = 2;
-			numArgsDict["sub"] = 2;
-			numArgsDict["mul"] = 2;
-			numArgsDict["div"] = 2;
-			numArgsDict["eq"] = 2;
-			numArgsDict["gt"] = 2;
-			numArgsDict["lt"] = 2;
-			numArgsDict["ge"] = 2;
-			numArgsDict["le"] = 2;
+			super(x, y);
+			this.op = operation;
+			this.return_item = null;
+		}
+		
+		public function setLeftInput(left:Item, label:String) {
+			left_arg = left;
+			left_label = label;
+		}
+		
+		public function setRightInput(right:Item, label:String) {
+			right_arg = right;
+			right_label = label;
+		}
+		
+		public function generateReturn():void {
+			if (left_arg == null || right_arg == null)
+				return;
 			
-			functionMap = new Dictionary;
-			functionMap["return"] = this.ret;
-			functionMap["call"] = this.cal;
-			//the following should probably be redefined
-
-			
-			var args:Array;
-			args = operation.split(" ");
-			
-			this.parse(args, 0);
-			/*
-			if (operation.indexOf(" ") != -1)
-			{
-				binary_operator = operation.substring(0, operation.indexOf(" "));
-				operation = operation.substring(operation.indexOf(" ")+1);
+			if (op == "eq") {
+				if (left_arg.value == right_arg.value)
+					return_item = new Constant("int", 1, 0, 0);
+				else
+					return_item = new Constant("int", 1, 0, 0);
 			}
-			else
-			{
-				binary_operator:String = operation.substring(0, operation.indexOf("\n"));
+			else if (op == "add") {
+				return_item = new Constant("int", left_arg.value + right_arg.value, 0, 0);
 			}
-
-			//we get the 1st argument type
-			if (operation.indexOf(" ") != -1)
-			{
-				arg1 = operation.substring(0, operation.indexOf(" "));
-				operation = operation.substring(operation.indexOf(" ")+1);
+			else if (op == "sub") {
+				return_item = new Constant("int", left_arg.value - right_arg.value, 0, 0);
 			}
-			else
-			{
-				arg1 = operation.substring(0, operation.indexOf("\n"));
-			}
-			
-			if (operation.indexOf(" ") != -1)
-			{
-				arg2 = operation.substring(0, operation.indexOf(" "));
-				operation = operation.substring(operation.indexOf(" ")+1);
-			}
-			else
-			{
-				arg2 = operation.substring(0, operation.indexOf("\n"));
-			}
-			
-			switch(binary_operator) {
-				case "+" :
-					if (arg1_type == "" && arg2_type == "") {
-						arg1_type = "Constant";
-						arg2_type = "Constant";
-						operation = 
-							function(x:Constant, y:Constant) {
-								x + y;
-							}
-					}
-					else if (arg2_type == "") {
-						arg1_type = "Constant"
-						arg2_type = "Constant"
-						operation =
-							function(x:Constant) {
-								x + arg2_cons;
-							}
-					}
-			}*/
 				
 		}
 		

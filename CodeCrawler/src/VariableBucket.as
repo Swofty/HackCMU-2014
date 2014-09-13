@@ -63,10 +63,11 @@ package
 				{
 					var TransferedBucket:VariableBucket = (VariableBucket)(this.cloneAt(100, 100));
 					TransferedBucket.ParameterDoor = null;
-					TransferedBucket.value = (Constant)(player.constant_list.removeItemAt(0));
+					TransferedBucket.value = Subtract((Constant)(player.constant_list.removeItemAt(0)),1);
 					ParameterDoor.linked_room = ParameterDoor.linked_room_layout.generateRoom(TransferedBucket.value, room);
 					ParameterDoor.linked_room.instantiateTemplateItem(TransferedBucket);
-					
+					if (TransferedBucket.value.value != 1)
+						ParameterDoor.linked_room.instantiateTemplateItem(new Door(ParameterDoor.linked_room_layout, 0, 0));
 					ParameterDoor.doAction(player,room);
 				}
 			}
@@ -83,6 +84,11 @@ package
 				value_string = value.toString();
 			}
 			return "var " + name + " = " + value_string;
+		}
+	
+		public function Subtract(c:Constant, i:int):Constant {
+			c.value-=i;
+			return c;
 		}
 	}
 
