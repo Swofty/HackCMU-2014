@@ -12,8 +12,8 @@ package
 
 		//2 sprites which indicate if a door is opened or closed
 		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Entry_Door:Class;
-		[Embed(source = "../assets/gfx/unlockedDoor.png")] private static var Locked_Door:Class;
-		[Embed(source = "../assets/gfx/lockedDoor.png")] private static var Opened_Door:Class;
+		[Embed(source = "../assets/gfx/lockedDoor.png")] private static var Locked_Door:Class;
+		[Embed(source = "../assets/gfx/unlockedDoor.png")] private static var Opened_Door:Class;
 
 		/** FUNCTION doors represent a function call, the linked_room
 		 * should be the room that the function call will generates.
@@ -32,6 +32,8 @@ package
 		public var associated_wall:int;
 		public var associated_buckets:ArrayList;
 		
+		public var isLocked:Boolean;
+		
 		/**
 		 * Constructor for a template version of a function call door.
 		 * Only mentions what kind of RoomLayout the door will lead to.
@@ -40,15 +42,22 @@ package
 		 * @param	x unnecessary
 		 * @param	y unnecessary
 		 */
-		public function Door(linked_layout:RoomLayout, x:int, y:int) 
+		public function Door(linked_room_layout:RoomLayout, x:int, y:int) 
 		{
 			super(x, y);
-			this.visible = false;
+			this.visible = true;
 			this.door_type = FUNCTION;
 			this.linked_room = null;
 			this.parent_room = null;
-			this.associated_wall = -1
+			this.linked_room_layout = linked_room_layout;
+			
+			this.associated_wall = -1;
 			this.associated_buckets = null;
+			
+			this.immovable = true;
+			
+			this.isLocked = true;
+			loadGraphic(Locked_Door, true, true,50,50);
 		}
 		
 		/**

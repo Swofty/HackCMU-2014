@@ -23,13 +23,6 @@ package
 		public var parent_room:Room;
 		
 		/**
-		 * An ArrayList of references to the doors within this room.
-		 * I assume the OverworldState will need this to help detect interaction
-		 * between the player and the doors
-		 */
-		public var doors:ArrayList;
-		
-		/**
 		 * Creates a room modeling after a function call with argument arg.
 		 * TODO: Add EntryDoor into the function room
 		 * TODO: Add VariableBucket for the arg next to the door
@@ -81,9 +74,27 @@ package
 		 * @param	template_door the template function door to create and instance of
 		 */
 		private function createFunctionDoorSet(template_door:Door):void {
-			var door_x:int = 0; // TODO
-			var door_y:int = 0; // TODO
 			var wall:int = TOP; // TODO
+			var door_x:int;
+			var door_y:int;
+			
+			trace("helloo");
+			if (wall == TOP){
+				door_x = 7*50;
+				door_y = 0*50;
+			}
+			if (wall == BOTTOM){
+				door_x = 7 * 50;
+				door_y = 12 * 50;
+			}
+			if (wall == LEFT){
+				door_x = 0 * 50;
+				door_y = 5 * 50;
+			}
+			if (wall == RIGHT){
+				door_x = 16 * 50;
+				door_y = 5 * 50;
+			}
 			
 			var layout:RoomLayout = template_door.linked_room_layout;
 			
@@ -120,7 +131,6 @@ package
 			
 			real_door.setFunctionCallVariables(this, wall, buckets);
 			items.addItem(real_door);
-			doors.addItem(real_door);
 		}
 		
 		public function findFreeX(item:Item):int {

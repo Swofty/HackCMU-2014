@@ -18,6 +18,8 @@ package
 		public function RoomLayout(function_name:String) {
 			template_items = new ArrayList();
 			layout_name = function_name;
+			
+			param_names = new ArrayList();
 		}
 		
 		public function addParam(param_name:String):void{
