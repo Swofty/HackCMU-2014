@@ -44,29 +44,122 @@ def hIf(output, line):
     indexIf = line.index("if")
     indexColon = line.index(":")
     indent = indexIf
-    if(len(line) > indexColon+1):
-        meat = line[indexColon+1:]
-    booleanCond = line[indexIf+2:indexColon]
     
-    return indent
+    if(len(line) > indexColon+1):
+        meat = [line[indexColon+1:]]
+    else:
+        meat = None
+    boolCond = line[indexIf+2:indexColon]
+    boolCond = boolCond.replace("(","").replace(")","")
+    if ("==" in boolCond): op = "=="
+    elif (">" in boolCond): op = ">"
+    elif ("<" in boolCond): op = "<"
+    varName, const = boolCond.split(op)
+    
+    output.write("if "+ op + " " + varName +" "+ const+"\n")
+    return indent,meat
+    
+def hElif(output, line):
+    line = line.rstrip()
+    indexIf = line.index("elif")
+    indexColon = line.index(":")
+    indent = indexIf
+    
+    if(len(line) > indexColon+1):
+        meat = [line[indexColon+1:]]
+    else:
+        meat = None
+    boolCond = line[indexIf+4:indexColon]
+    boolCond = boolCond.replace("(","").replace(")","")
+    if ("==" in boolCond): op = "=="
+    elif (">" in boolCond): op = ">"
+    elif ("<" in boolCond): op = "<"
+    varName, const = boolCond.split(op)
+    output.write("elif "+ op + " " + varName +" "+ const +"\n")
+    return indent,meat
+    
+def hElse(output, line):
+    line = line.rstrip()
+    indexIf = line.index("else")
+    indexColon = line.index(":")
+    indent = indexIf
+    if(len(line) > indexColon+1):
+        meat = [line[indexColon+1:]]
+    else:
+        meat = None
+    output.write("else\n")
+    return indent,meat
+    
+    
+def hIfmid(output,lines,lineNumber,indent):
+    meat=[]
+    def getIndent(l):
+        return len(l) - len(l.lstrip())
+    while(getIndent(lines[lineNumber]) > indent):
+        line = lines[lineNumber]
+        if(not line.isspace())
+            meat.append(line)
+        lineNumber+=1
+    return meat,lineNumber-1
+
     
 def hReturn(output, line):
+    
     #output.write("
     
 
+OUTPUT = open("outputs.ccr", "w")
+
+def parse(lines):
+    lineNumber = 0
+    totalLines = len(lines)
+    while(lineNumber<totalLines):
+        line = lines[lineNumber]
+        for kywrd in KEYWORDS:
+            if kywrd in line:
+                if(kywrd == "if"):
+                    indent,meat = hIf(output, line)
+                    if(meat == None):
+                        meat,lineNumber = fIfmid(output,lines,lineNumber+1,indent)
+                    parse(meat)
+                    a = 1
+                    ltemp = lines[lineNumber+a]
+                    while(ltemp.isspace())
+                        a+=1
+                        ltemp=lines[lineNumber+a]
+                    if not("elif" in ltemp or "else" in ltemp):
+                        OUTPUT.write("end condition\n")
+                elif(kywrd == "elif"):
+                    indent,meat = hElif(output, line)
+                    if(meat == None):
+                        meat,lineNumber = fIfmid(output,lines,lineNumber+1,indent)
+                    parse(meat)
+                    a = 1
+                    ltemp = lines[lineNumber+a]
+                    while(ltemp.isspace())
+                        a+=1
+                        ltemp=lines[lineNumber+a]
+                    if not("elif" in ltemp or "else" in ltemp):
+                        OUTPUT.write("end condition\n")
+                elif(kywrd == "else"):
+                    indent,meat = hElse(output, line)
+                    if(meat == None):
+                        meat,lineNumber = fIfmid(output,lines,lineNumber+1,indent)
+                    parse(meat)
+                    OUTPUT.write("end condition\n")
+                    
+                else:
+                    KEYWORDS_FUNCTIONS[kywrd](f, line)
+                    
+                    
+        lineNumber+=1
 with open(pyFile, "r") as pf:
-    with open("outputs.crl", "w") as f:
-        line = pf.readline()
-        while(line != ""):
-            for kywrd in KEYWORDS:
-                if kywrd in line():
-                    if(kywrd == "if"):
-                        indent = hIf(f, line)
-                    else:
-                        KEYWORDS_FUNCTIONS[kywrd](f, line)
-            
+    pflines = pf.readlines()
+   
 
+parse(pflines)
 
+OUTPUT.close()
 
 
 
