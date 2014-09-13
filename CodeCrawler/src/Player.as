@@ -1,6 +1,7 @@
 package  
 {
 	import org.flixel.*;
+	import mx.collections.*;
 
 	public class Player extends FlxSprite 
 	{
@@ -8,8 +9,8 @@ package
 		[Embed(source = "../assets/gfx/Bitman.png")] private static var CharacterSprite:Class;
 		
 		//variables to control player movement
-		
-		public var inBattle:Boolean; //used to define whether the player is in the overworld or in battle
+		public var variable_list:ArrayList;	//holds all of variables the player currently has
+		public var constant_list:ArrayList; //holds all of the constants the player currently has
 		
 		public function Player(X:int,Y:int) 
 		{
@@ -19,14 +20,7 @@ package
 			//Phsysics[!?]
 			maxVelocity.x = 300;
 			maxVelocity.y = 600;
-			
-			/*
-			 * animations needed
-			 * moving
-			 * victory
-			 * surprise
-			 * holding objects
-			 */ 
+			 
 			addAnimation("move_right", [0, 1], 5,true);			//self explanatory
 			addAnimation("move_up", [2, 3], 5,true);			//self explanatory
 			addAnimation("move_left", [4,5], 5,true);			//self explanatory
@@ -65,32 +59,6 @@ package
 			}
 			if (!moving)
 				play("idle");
-			/*if (this.x % 50 != 0)
-			{
-				this.x += 10;
-			}
-			else if (this.y % 50 != 0)
-			{
-				this.y += 10;
-			}*/
-		}
-		//********IMPLEMENT THESE******************
-		public function restorePhysics():void 
-		{
-
-		}
-		public function die(mapheight:int):void
-		{
-
-		}
-		public function victory():void 
-		{
-			
-		}
-		public function doAttack():void 
-		{
-			
 		}
 	}
-
 }

@@ -1,5 +1,7 @@
 package 
 {
+	import mx.collections.*;
+	
 	import adobe.utils.CustomActions;
 	import flash.text.engine.ElementFormat;
 	import mx.core.ButtonAsset;
@@ -8,7 +10,7 @@ package
 	import org.flixel.*;
 	import flash.display.Graphics;
 	import flash.utils.getQualifiedSuperclassName; //used to figure out the super class of some classes
-	public class  OverworldState extends FlxState
+	public class OverworldState extends FlxState
 	{
 		FlxG.debug;
 		//********Map building stuff*************************
@@ -17,17 +19,17 @@ package
 		private const TILEHEIGHT:uint = 50;
 		
 		//used to generate a map which determines which tiles to set ***********[maps need to be made]
-		public var spec:String;
+		//public var spec:String;
 		
 		private var map:FlxTilemap;	//stores the actual map that is uploaded
 		private var mapdata:String; //stores the string that the map is made out of
+		
 		private var floor:Floor; 	//stores the map and things associated with it.
 		private var floorArray:Array; //stores all of the maps we will possibly use
 		
 		private var floorParentArray:Array; //stores the names of the parents of each floor
 		private var floorNameArray:Array; //stores the name of each floor
 		
-		private var background:FlxTilemap;
 		//Embed generate graphic tileset to use
 		[Embed(source = '../assets/gfx/wall.png')] private var Tiles:Class;
 		
@@ -40,27 +42,25 @@ package
 		
 		//*****Actual game things****************************
 		private var player:Player ;
-		private var camera:FlxCamera;
-		private var floortitle:FlxText;
+		private var room_layout_list:ArrayList;
 		
-		private var enemyGroup:FlxGroup = new FlxGroup;
+		private var room_title:FlxText;
+		//private var current_room:Room;
 		
-		public var newBattle:BattleState;
-
 		override public	 function create():void 
 		{	
 			//****MUSIC AND SFX******************************
 			FlxG.play(OverworldBGM);
 			
 			//**********Mapping shit*************************
-			[Embed(source = '../assets/maps/test.txt', mimeType = 'application/octet-stream')] var floordata:Class;
-			background = new FlxTilemap();
-			background.loadMap(new floordata, FloorTiles, TILEWIDTH, TILEHEIGHT);
-			add(background);
+			[Embed(source = '../assets/maps/test.txt', mimeType = 'application/octet-stream')] var floor_data:Class;
+			map = new FlxTilemap();
+			map.loadMap(new floor_data, FloorTiles, TILEWIDTH, TILEHEIGHT);
+			add(map);
 			
 			player = new Player(100, 100);
-			generateMaps();	//This function will be used to generate an array of all maps we will use.
-			
+			//generateMaps();	//This function will be used to generate an array of all maps we will use.
+			/*
 			while ((floor.map.getTile((player.x + TILEWIDTH) / TILEWIDTH, (player.y)/ TILEHEIGHT) != 0))
 			{
 				if (player.x+ 900 < floor.map.width)
@@ -73,11 +73,12 @@ package
 					player.y += 600;
 				}
 			}
+			*/
 			add(player);
 			
-			
+			/*
 			//*********Generate enemies**********************
-			generateEnemies();
+			//generateEnemies();
 			
 			//*********Sets world bounds*********************
 			FlxG.worldBounds = new FlxRect(0, 0, floor.map.width, floor.map.height);
@@ -87,58 +88,60 @@ package
 			FlxG.camera.height = 600;
 			FlxG.camera.setBounds(0, 0, floor.map.width, floor.map.height);
 			FlxG.camera.follow(player, FlxCamera.STYLE_TOPDOWN);
+			*/
 			
-			floortitle = new FlxText(player.x-100, player.y-10, 200, floorArray[0].name)
-			add(floortitle);
+			room_title = new FlxText(player.x-100, player.y-10, 200, "hello title!")//floorArray[0].name)
+			add(room_title);
 			
 			super.create();
 		}
 		override public function update():void 
 		{
-			floortitle.text = floorArray[floorArray.indexOf(floor)].name;
-			floortitle.x = player.x;
-			floortitle.y = player.y - 30;
+/*			room_title.text = floorArray[floorArray.indexOf(floor)].name;
+			room_title.x = player.x;
+			room_title.y = player.y - 30;
+			*/
 			//This stuff collides the player with the map, it smooths edges to stop annoying derpy things. 
-			if (FlxG.collide(player, floor.map))
+			if (FlxG.collide(player, map))
 			{
 				//This smooths a play's maneuverying around square objects if they are colliding on the top when they want to move sideways
-				if ((floor.map.getTile((player.x + player.width) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
-					&& floor.map.getTile((player.x + player.width) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
-					|| (floor.map.getTile((player.x-1) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
-					&& floor.map.getTile((player.x-1) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
+				if ((map.getTile((player.x + player.width) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
+					&& map.getTile((player.x + player.width) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
+					|| (map.getTile((player.x-1) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
+					&& map.getTile((player.x-1) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
 					)
 					{
 						player.y += 2;
 					}	
 				//This smooths a play's maneuverying around square objects if they are colliding on the bottom when they want to move sideways
-				if ((floor.map.getTile((player.x + player.width) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
-					&& floor.map.getTile((player.x + player.width) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
-					|| (floor.map.getTile((player.x-1) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
-					&& floor.map.getTile((player.x-1) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
+				if ((map.getTile((player.x + player.width) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
+					&& map.getTile((player.x + player.width) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
+					|| (map.getTile((player.x-1) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
+					&& map.getTile((player.x-1) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
 					)
 					{
 						player.y -= 2;
 					}
 				//This smooths a play's maneuverying around square objects if they are colliding on the left when they want to move vertically
-				if ((floor.map.getTile((player.x) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
-					&& floor.map.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
-					|| (floor.map.getTile((player.x) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
-					&& floor.map.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) == 0)
+				if ((map.getTile((player.x) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
+					&& map.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
+					|| (map.getTile((player.x) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
+					&& map.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) == 0)
 					)
 					{
 						player.x += 2;
 					}
 				//This smooths a play's maneuverying around square objects if they are colliding on the right when they want to move vertically
-				if ((floor.map.getTile((player.x + player.width-1) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
-					&& floor.map.getTile((player.x + (player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
-					|| (floor.map.getTile((player.x + player.width-1) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
-					&& floor.map.getTile((player.x + (player.width/3)) / TILEWIDTH, (player.y + player.height) / TILEHEIGHT) == 0)
+				if ((map.getTile((player.x + player.width-1) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
+					&& map.getTile((player.x + (player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
+					|| (map.getTile((player.x + player.width-1) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
+					&& map.getTile((player.x + (player.width/3)) / TILEWIDTH, (player.y + player.height) / TILEHEIGHT) == 0)
 					)
 					{
 						player.x -= 2;
 					}
 			}
-			
+			/*
 			if (FlxG.overlap(player, floor.stairGroup))
 			{
 				var stairTraversed:Stairs = floor.determineStair(player);
@@ -174,21 +177,15 @@ package
 				}
 			}
 			
-			if (FlxG.overlap(player, enemyGroup))
-			{
-				var currentEnemy:Enemy = determineEnemy(player);
-				newBattle = new BattleState(currentEnemy.myName.text, currentEnemy.health, "DOC",this);
-				player.x -= 20;
-				player.y -= 20;
-				//FlxG.switchState(newBattle);
-			}
 			trace(floorNameArray[floorArray.indexOf(floor)]);
+			*/
 			super.update();
 		}
 		
 		
 		//This function will take our spec and generates and array that stores all of our .txt files
 		//These .txt files are the floors of our dungeons.
+		/*
 		public function generateMaps():void
 		{
 			var myMapSpec:String = spec;
@@ -236,6 +233,7 @@ package
 			add(this.floor.map);
 			add(this.floor.stairGroup);
 		}
+		*/
 		
 		public function generateStairs():void
 		{
@@ -274,7 +272,7 @@ package
 			}
 			return;
 		}
-		
+		/*
 		public function generateEnemies():void
 		{
 			var width:int = floor.map.widthInTiles;
@@ -316,6 +314,7 @@ package
 			}
 			add(enemyGroup);
 		}
+		*/
 		//This function will load a map and insert the appropriate stairs
 		public function loadMap(floorChange:Floor):void
 		{
@@ -341,15 +340,6 @@ package
 				}
 			}
 			return new FlxPoint( -1000, -1000);
-		}
-		public function determineEnemy(player:Player):Enemy
-		{
-			for each (var enemy:Enemy in enemyGroup.members)
-			{
-				if (Math.abs(enemy.x - player.x) < 50 || Math.abs(enemy.y - player.y) < 50)
-					return enemy;
-			}
-			return enemy;
 		}
 	}	
 }
