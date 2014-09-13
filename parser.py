@@ -4,7 +4,7 @@ import sys
 DEFINED_VARS = { }
 FUNC_PARAM_VARS = set()
 FUNCARGS = {}
-INSIDE_FUNCTION_DEF = False
+INSIDE_FUNCTION_DEF = 0
 
 pyFile = sys.argv[1]
 
@@ -37,7 +37,7 @@ def parseExpr(expr):
     for i in range(len(allTerms)):
         term = allTerms[i]
         if(term in ["add", "sub", "mul", "div", "pow"]): continue
-        elif(term in DEFINED_VARS or term in FUNC_PARAM_VARS): allTerms[i] = "const " + term
+        elif(term in DEFINED_VARS or term in FUNC_PARAM_VARS): allTerms[i] = "var " + term
         elif(term in FUNCARGS): allTerms[i] = "call "+term+(" {}".format(FUNCARGS[term]))
             
     final = " ".join(allTerms)
@@ -49,17 +49,18 @@ def hDef(output, line):
     
     global INSIDE_FUNCTION_DEF
     global FUNC_PARAM_VARS
-    INSIDE_FUNCTION_DEF = True
+    INSIDE_FUNCTION_DEF += 1
     parenthIndex = line.index("(")
     secondParenth = line.index(")")
     name = line[4:parenthIndex]
     parameters = line[parenthIndex+1:secondParenth].split(",")
     for i in range(len(parameters)):
         parameters[i] = parameters[i].strip()
-    output.write("start_room {}\n".format(name))
-    for p in parameters:
-        output.write("parameter {}\n".format(p))
-        FUNC_PARAM_VARS.add(p)
+    output.write("start room {}\n".format(name))
+    if(parameters[0] != ""):
+        for p in parameters:
+            output.write("parameter {}\n".format(p))
+            FUNC_PARAM_VARS.add(p)
 
 def hAssign(output, line):
     if(line.count("=")%2==0): return
@@ -154,6 +155,7 @@ OUTPUT = open("outputs.ccr", "w")
 def parse(lines):
     global FUNCARGS
     global INSIDE_FUNCTION_DEF
+    ifd_startval = INSIDE_FUNCTION_DEF
     for line in lines:
         if("def" == line[:3]):
             modLine = line[3:].lstrip()
@@ -164,14 +166,14 @@ def parse(lines):
     lineNumber = 0
     totalLines = len(lines)
     while(lineNumber<totalLines):
-        
+        kywrdFound = False
         line = lines[lineNumber]
         if (line==line.lstrip() and lineNumber!=0 and INSIDE_FUNCTION_DEF):
-            INSIDE_FUNCTION_DEF = False
-            OUTPUT.write("end_room\n")
+            INSIDE_FUNCTION_DEF -= 1
+            OUTPUT.write("end room\n")
         for kywrd in KEYWORDS:
             if kywrd in line:
-                
+                kywrdFound = True
                 if(kywrd == "if" and ("elif" not in line) and line.strip().startswith("if")):
                     
                     indent,meat = hIf(OUTPUT, line)
@@ -207,16 +209,18 @@ def parse(lines):
                     parse(meat)
                     
                     OUTPUT.write("end condition\n")
+                elif(kywrd == "if" and "elif" in line):
+                    continue
                     
                 else:
-                    
-                    try:
-                        KEYWORDS_FUNCTIONS[kywrd](OUTPUT, line)
-                    except:
-                        print(kywrd)
-           # else:
-               #parseExpr
+                    KEYWORDS_FUNCTIONS[kywrd](OUTPUT, line)
+        if not(kywrdFound or line.isspace()):
+            res = parseExpr(line)
+            OUTPUT.write(res + "\n")
         lineNumber+=1
+    if(INSIDE_FUNCTION_DEF > ifd_startval):
+        INSIDE_FUNCTION_DEF -= 1
+        OUTPUT.write("end room\n")
     
 
     
@@ -227,12 +231,12 @@ KEYWORDS = ["def", "=", "if", "elif", "else", "return"]
 
 KEYWORDS_FUNCTIONS = {"def" : hDef,
                       "=": hAssign,
-                      #"if": hIf,
-                      #"elif" : hElif,
-                      #"else" : hElse,
+                      "if": hIf,
+                      "elif" : hElif,
+                      "else" : hElse,
                       "return": hReturn }
 parse(pflines)
-OUTPUT.write("END_OF_FILE")
+OUTPUT.write("END OF FILE\n")
 
 OUTPUT.close()
 
