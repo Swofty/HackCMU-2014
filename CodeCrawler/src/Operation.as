@@ -100,31 +100,7 @@ package
 			}*/
 				
 		}
-		public function parse(args:Array, ind:int)
-		{
-			//return add call fib 1 sub var x const 1 call fib 1 sub var x const 2
-			term = args[ind];
-			if(term == "const"){
-				args[ind] = args[ind+1];
-				args.removeItemAt(ind+1);
-				return args[ind];
-			}
-			else if(term == "var"){
-				//Do thing regarding vars here
-				args[ind] = args[ind+1];
-				args.removeItemAt(ind+1);
-				return args[ind];
-			}
-			numArgs = this.numArgsDict[term];
-			var values:Array = new Array();
-			for(var i:int; i<numArgs; i++){
-				values.push(this.parse(args, ind+i));
-			}
-			var v:String = functionMap[term](values);
-			args[ind] = v;
-			for(var i:int; i<numArgs; i++){ args.removeItemAt(ind+1); } //removes arguments
-			return v;
-		}
+		
 	}
 	
 }
