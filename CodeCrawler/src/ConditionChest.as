@@ -22,6 +22,8 @@ package
 			this.false_results = new ArrayList();
 		}
 		
+		public function addTrueItems(
+		
 		override public function getDescription():String {
 			return "Value: " + value;
 		}
