@@ -10,6 +10,7 @@ package
 	import org.flixel.*;
 	import flash.display.Graphics;
 	import flash.utils.getQualifiedSuperclassName; //used to figure out the super class of some classes
+	
 	public class OverworldState extends FlxState
 	{
 		FlxG.debug;
@@ -18,23 +19,11 @@ package
 		private const TILEWIDTH:uint = 50;
 		private const TILEHEIGHT:uint = 50;
 		
-		//used to generate a map which determines which tiles to set ***********[maps need to be made]
-		//public var spec:String;
+		private var map:FlxTilemap;	//stores the actual map that is uploaded		
+		[Embed(source = '../assets/maps/test.txt', mimeType = 'application/octet-stream')] var map_data:Class; //stores the string that the map is made out of
 		
-		private var map:FlxTilemap;	//stores the actual map that is uploaded
-		private var mapdata:String; //stores the string that the map is made out of
-		
-		private var floor:Floor; 	//stores the map and things associated with it.
-		private var floorArray:Array; //stores all of the maps we will possibly use
-		
-		private var floorParentArray:Array; //stores the names of the parents of each floor
-		private var floorNameArray:Array; //stores the name of each floor
-		
-		//Embed generate graphic tileset to use
-		[Embed(source = '../assets/gfx/wall.png')] private var Tiles:Class;
-		
-		//Embed generate graphic tileset to use
-		[Embed(source = '../assets/gfx/floor.png')] private var FloorTiles:Class;
+		[Embed(source = '../assets/gfx/wall.png')] private var Wall_Tiles:Class;		//Embed wall tileset to use
+		[Embed(source = '../assets/gfx/floor.png')] private var Floor_Tiles:Class;		//Embed floor tileset to use
 		
 		//******Background Music*****************************
 		//Hyrule Temple
@@ -42,23 +31,48 @@ package
 		
 		//*****Actual game things****************************
 		private var player:Player ;
-		private var room_layout_list:ArrayList;
+		private var room_layout_list:ArrayList = new ArrayList();
 		
+		private var current_room:Room;
 		private var room_title:FlxText;
-		//private var current_room:Room;
 		
-		override public	 function create():void 
+		private var variable_display:FlxText;
+		private var constant_display:FlxText;
+		private var expression_display:FlxText;
+
+		private var code_display:FlxText;
+		private var code_tracker:FlxSprite;
+		
+		override public function create():void 
 		{	
 			//****MUSIC AND SFX******************************
-			FlxG.play(OverworldBGM);
+			//FlxG.play(OverworldBGM);
 			
 			//**********Mapping shit*************************
-			[Embed(source = '../assets/maps/test.txt', mimeType = 'application/octet-stream')] var floor_data:Class;
+			/*
 			map = new FlxTilemap();
-			map.loadMap(new floor_data, FloorTiles, TILEWIDTH, TILEHEIGHT);
+			
+			map.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);
 			add(map);
+			*/
 			
 			player = new Player(100, 100);
+			
+			var c:Constant = new Constant("int", 5, 1 * TILEWIDTH, 1 * TILEHEIGHT);
+
+			room_layout_list.addItem(new RoomLayout("fib"));
+			current_room = (RoomLayout)(room_layout_list.getItemAt(0)).generateRoom(c, null);
+			current_room.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);
+			
+			add(current_room);
+			
+			//add((Item)(current_room.items.getItemAt(0)));
+			for (var i:int = 0; i < current_room.items.length; i++)
+			{
+				trace("hellO");
+				add((Item)(current_room.items.getItemAt(i)));
+			}
+			
 			//generateMaps();	//This function will be used to generate an array of all maps we will use.
 			/*
 			while ((floor.map.getTile((player.x + TILEWIDTH) / TILEWIDTH, (player.y)/ TILEHEIGHT) != 0))
@@ -93,6 +107,26 @@ package
 			room_title = new FlxText(player.x-100, player.y-10, 200, "hello title!")//floorArray[0].name)
 			add(room_title);
 			
+			variable_display = new FlxText(0, 600, 200, "variables!")//floorArray[0].name)
+			variable_display.size = 2 * variable_display.size;
+			constant_display = new FlxText(200, 600, 200, "constants!")//floorArray[0].name)
+			constant_display.size = 2 * constant_display.size;
+			expression_display = new FlxText(400, 600, 400, "expressions!")//floorArray[0].name)
+			expression_display.size = 2 * expression_display.size;
+			
+			code_display = new FlxText(800, 0, 150, "code!")
+			code_display.size = 2 * code_display.size;
+			
+			code_tracker = new FlxSprite(800, 0);
+			code_tracker.width = 400;
+			code_tracker.alpha = 0.5;
+			
+			add(variable_display);
+			add(constant_display);
+			add(expression_display);
+			add(code_display);
+			add(code_tracker);
+			
 			super.create();
 		}
 		override public function update():void 
@@ -102,45 +136,70 @@ package
 			room_title.y = player.y - 30;
 			*/
 			//This stuff collides the player with the map, it smooths edges to stop annoying derpy things. 
-			if (FlxG.collide(player, map))
+			if (FlxG.collide(player, current_room))
 			{
 				//This smooths a play's maneuverying around square objects if they are colliding on the top when they want to move sideways
-				if ((map.getTile((player.x + player.width) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + player.width) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
-					|| (map.getTile((player.x-1) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
-					&& map.getTile((player.x-1) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
+				if ((current_room.getTile((player.x + player.width) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + player.width) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
+					|| (current_room.getTile((player.x-1) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x-1) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
 					)
 					{
 						player.y += 2;
 					}	
 				//This smooths a play's maneuverying around square objects if they are colliding on the bottom when they want to move sideways
-				if ((map.getTile((player.x + player.width) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + player.width) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
-					|| (map.getTile((player.x-1) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
-					&& map.getTile((player.x-1) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
+				if ((current_room.getTile((player.x + player.width) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + player.width) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
+					|| (current_room.getTile((player.x-1) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x-1) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
 					)
 					{
 						player.y -= 2;
 					}
 				//This smooths a play's maneuverying around square objects if they are colliding on the left when they want to move vertically
-				if ((map.getTile((player.x) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
-					|| (map.getTile((player.x) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) == 0)
+				if ((current_room.getTile((player.x) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
+					|| (current_room.getTile((player.x) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) == 0)
 					)
 					{
 						player.x += 2;
 					}
 				//This smooths a play's maneuverying around square objects if they are colliding on the right when they want to move vertically
-				if ((map.getTile((player.x + player.width-1) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + (player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
-					|| (map.getTile((player.x + player.width-1) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + (player.width/3)) / TILEWIDTH, (player.y + player.height) / TILEHEIGHT) == 0)
+				if ((current_room.getTile((player.x + player.width-1) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + (player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
+					|| (current_room.getTile((player.x + player.width-1) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + (player.width/3)) / TILEWIDTH, (player.y + player.height) / TILEHEIGHT) == 0)
 					)
 					{
 						player.x -= 2;
 					}
 			}
+
+			var overAnItem:Boolean = false;	//hacky way to check if we are over an item in this step
+			for (var i:int = 0; i < current_room.items.length; i++)
+			{
+				var considered_item:Item = (Item)(current_room.items.getItemAt(i));
+				if (player.overlaps(considered_item)) {
+					overAnItem = true;
+					expression_display.text = considered_item.toString();
+				}
+			}
+			
+			if (!overAnItem)
+				expression_display.text = "Expressions go here";
+
+			
+			if (FlxG.keys.SPACE)
+			{
+				for (var i:int = 0; i < current_room.items.length; i++)
+				{
+					var considered_item = (Item)(current_room.items.getItemAt(i));
+					if (player.overlaps(considered_item))
+						trace("insert item description");
+				}
+			}
+
 			/*
 			if (FlxG.overlap(player, floor.stairGroup))
 			{
@@ -234,7 +293,7 @@ package
 			add(this.floor.stairGroup);
 		}
 		*/
-		
+		/*
 		public function generateStairs():void
 		{
 			for (var i: int = 0; i < floorArray.length; i++)
@@ -272,6 +331,7 @@ package
 			}
 			return;
 		}
+		*/
 		/*
 		public function generateEnemies():void
 		{
@@ -315,6 +375,7 @@ package
 			add(enemyGroup);
 		}
 		*/
+		/*
 		//This function will load a map and insert the appropriate stairs
 		public function loadMap(floorChange:Floor):void
 		{
@@ -324,8 +385,10 @@ package
 			add(floor.map);
 			add(floor.stairGroup);
 		}
+		*/
 		//This function will look for stais, designated by the tile 2
 		//We know there must be a stair here
+		/*
 		public function findStairs(floormap:FlxTilemap):FlxPoint
 		{
 			for (var i:int = 0; i < floormap.widthInTiles; i++)
@@ -341,5 +404,6 @@ package
 			}
 			return new FlxPoint( -1000, -1000);
 		}
+		*/
 	}	
 }
