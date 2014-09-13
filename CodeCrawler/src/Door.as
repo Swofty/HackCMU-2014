@@ -14,28 +14,22 @@ package
 		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Entry_Door:Class;
 		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Locked_Door:Class;
 		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Opened_Door:Class;
-				
-		//variables to indicate direction of stairs
-		public var descend:Boolean //indicates whether the stair is going down a level or up a level
-		public var above:Floor; //indicates the top level of that stair
-		public var below:Floor; //indicates the bottomw level of that stair
-		
 
 		/** FUNCTION doors represent a function call, the linked_room
 		 * should be the room that the function call will generates.
 		 */
-		public static final var FUNCTION:int = 0;
+		public static var FUNCTION:int = 0;
 		
 		/** RETURN doors represent a return statement, the linked_room
 		 * should be the room that the current function call will return to
 		 */
-		public static final var RETURN:int = 1;
+		public static var RETURN:int = 1;
 		
 		public var door_type:int;
 		public var linked_room_layout:RoomLayout;
 		public var linked_room:Room;
 		public var parent_room:Room;
-		public var associated_wall:String;
+		public var associated_wall:int;
 		public var associated_buckets:ArrayList;
 		
 		/**
@@ -65,7 +59,7 @@ package
 		 * @param	wall
 		 * @param	buckets
 		 */
-		public function setFunctionCallVariables(parent:Room, wall:String, buckets:ArrayList):void {
+		public function setFunctionCallVariables(parent:Room, wall:int, buckets:ArrayList):void {
 			this.door_type = FUNCTION;
 			this.parent_room = parent;
 			this.associated_wall = wall;

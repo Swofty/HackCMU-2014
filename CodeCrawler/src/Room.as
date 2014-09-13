@@ -11,10 +11,10 @@ package
 		public var items:ArrayList;
 		
 		// Constants that refer tot he room's walls
-		public static final var TOP:int = 0;
-		public static final var RIGHT:int = 1;
-		public static final var BOTTOM:int = 2;
-		public static final var LEFT:int = 3;
+		public static var TOP:int = 0;
+		public static var RIGHT:int = 1;
+		public static var BOTTOM:int = 2;
+		public static var LEFT:int = 3;
 		
 		/** String of the function call with arg */
 		public var room_title:String; 
@@ -40,6 +40,10 @@ package
 		public function Room(arg:Constant, parent:Room, function_name:String)
 		{
 			this.items = new ArrayList();
+			trace(this.items.length);
+			this.items.addItem(arg);
+			trace(this.items.length);
+			
 			this.room_title = function_name + "(" + arg + ")";
 			this.parent_room = parent;
 			
@@ -81,7 +85,7 @@ package
 		public function createFunctionDoorSet(template_door:Door) {
 			var door_x:int = 0; // TODO
 			var door_y:int = 0; // TODO
-			var wall:String = "top"; // TODO
+			var wall:int = TOP; // TODO
 			
 			var layout:RoomLayout = template_door.linked_room_layout;
 			
@@ -111,7 +115,7 @@ package
 			{
 				var bucket_x:int = bucket_offset_x * (i + 1);
 				var bucket_y:int = bucket_offset_y * (i + 1);
-				var bucket:VariableBucket = new VariableBucket(layout.param_names.getItemAt(i), null, bucket_x, bucket_y);
+				var bucket:VariableBucket = new VariableBucket((String)(layout.param_names.getItemAt(i)), null, bucket_x, bucket_y);
 				items.addItem(bucket);
 				buckets.addItem(bucket);
 			}

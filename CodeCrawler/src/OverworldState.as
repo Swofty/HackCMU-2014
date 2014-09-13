@@ -31,7 +31,7 @@ package
 		
 		//*****Actual game things****************************
 		private var player:Player ;
-		private var room_layout_list:ArrayList;
+		private var room_layout_list:ArrayList = new ArrayList();
 		
 		private var current_room:Room;
 		private var room_title:FlxText;
@@ -46,22 +46,33 @@ package
 		override public function create():void 
 		{	
 			//****MUSIC AND SFX******************************
-			FlxG.play(OverworldBGM);
+			//FlxG.play(OverworldBGM);
 			
 			//**********Mapping shit*************************
+			/*
 			map = new FlxTilemap();
 			
 			map.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);
 			add(map);
+			*/
 			
 			player = new Player(100, 100);
 			
 			var c:Constant = new Constant("int", 5, 1 * TILEWIDTH, 1 * TILEHEIGHT);
 
 			room_layout_list.addItem(new RoomLayout("fib"));
-			current_room = (RoomLayout)(room_layout_list.getItemAt(0)).generateRoom();
-			current_room.addItem(c);
+			current_room = (RoomLayout)(room_layout_list.getItemAt(0)).generateRoom(c, null);
+			current_room.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);
+			
 			add(current_room);
+			
+			add((Item)(current_room.items.getItemAt(0)));
+			for each (var item:Item in current_room.items)
+			{
+				trace("hellO");
+				add(item);
+			}
+			
 			//generateMaps();	//This function will be used to generate an array of all maps we will use.
 			/*
 			while ((floor.map.getTile((player.x + TILEWIDTH) / TILEWIDTH, (player.y)/ TILEHEIGHT) != 0))
@@ -144,15 +155,16 @@ package
 						player.x -= 2;
 					}
 			}
-
+/*
 			if (FlxG.keys.SPACE)
 			{
-				for each (var item in current_room.items)
+				for each (var item:Item in current_room.items)
 				{
 					if (player.overlaps(item))
 						trace("yaaaay");
 				}
 			}
+*/
 			/*
 			if (FlxG.overlap(player, floor.stairGroup))
 			{

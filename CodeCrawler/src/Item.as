@@ -24,7 +24,7 @@ package
 			return new Item(new_x, new_y);
 		}
 		
-		public function toString():String {
+		override public function toString():String {
 			return "Generic item";
 		}
 	}

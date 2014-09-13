@@ -6,7 +6,7 @@ package
 	 */
 	public class VariableBucket extends Item
 	{
-		[Embed (source = "")] private static var sprite:Class;
+		[Embed (source = "../assets/gfx/DOCSprite.png")] private static var sprite:Class;
 		
 		public var name:String;
 		public var value:Constant;
@@ -22,7 +22,7 @@ package
 			return this.value == null;
 		}
 		
-		override public function getDescription():String {\
+		override public function getDescription():String {
 			var value_string:String;
 			if (value == null) {
 				value_string = "None";
@@ -41,7 +41,7 @@ package
 			if (value == null)
 				return new VariableBucket(this.name, null, new_x, new_y);
 			else
-				return new VariableBucket(this.name, value.cloneAt(new_x, new_y), new_x, new_y);
+				return new VariableBucket(this.name, (Constant)(value.cloneAt(new_x, new_y)), new_x, new_y);
 		}
 		
 		override public function toString():String {

@@ -20,7 +20,7 @@ package
 			layout_name = function_name;
 		}
 		
-		public function addParam(param_name:String) {
+		public function addParam(param_name:String):void{
 			param_names.addItem(param_name);
 		}
 		
@@ -42,7 +42,7 @@ package
 		public function generateRoom(arg:Constant, parent:Room) : Room {
 			var room:Room = new Room(arg, parent, this.layout_name);
 			for (var i:int = 0; i < template_items.length; i++) {
-				var template_item:Item = template_items[i];
+				var template_item:Item = template_items.getItemAt(i);
 				room.instantiateTemplateItem(template_item);
 			}
 			return room;
