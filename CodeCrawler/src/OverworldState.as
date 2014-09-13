@@ -20,7 +20,7 @@ package
 		private const TILEHEIGHT:uint = 50;
 		
 		private var map:FlxTilemap;	//stores the actual map that is uploaded		
-		[Embed(source = '../assets/maps/test.txt', mimeType = 'application/octet-stream')] var map_data:Class; //stores the string that the map is made out of
+		[Embed(source = '../assets/maps/test.txt', mimeType = 'application/octet-stream')] private var map_data:Class; //stores the string that the map is made out of
 		
 		[Embed(source = '../assets/gfx/wall.png')] private var Wall_Tiles:Class;		//Embed wall tileset to use
 		[Embed(source = '../assets/gfx/floor.png')] private var Floor_Tiles:Class;		//Embed floor tileset to use
@@ -176,27 +176,37 @@ package
 					}
 			}
 
-			var overAnItem:Boolean = false;	//hacky way to check if we are over an item in this step
-			for (var i:int = 0; i < current_room.items.length; i++)
+			var i:int = 0;
+			constant_display.text = "Constants: \n";
+			for (i= 0; i < player.constant_list.length; i++)
 			{
-				var considered_item:Item = (Item)(current_room.items.getItemAt(i));
-				if (player.overlaps(considered_item)) {
-					overAnItem = true;
-					expression_display.text = considered_item.toString();
-				}
+				constant_display.text += (Item)(player.constant_list.getItemAt(i)).toString() + "\n";
 			}
 			
-			if (!overAnItem)
-				expression_display.text = "Expressions go here";
-
+			variable_display.text = "Variables: \n";
+			for (i = 0; i < player.variable_list.length; i++)
+			{
+				variable_display.text += (Item)(player.variable_list.getItemAt(i)).toString() + "\n";	
+			}
+			
+			
+			expression_display.text = "Current Expression: \n"
+			var considered_item:Item;
+			for (i = 0; i < current_room.items.length; i++)
+			{
+				considered_item = (Item)(current_room.items.getItemAt(i));
+				if (player.overlaps(considered_item)) {
+					expression_display.text += considered_item.toString();
+				}
+			}			
 			
 			if (FlxG.keys.SPACE)
 			{
-				for (var i:int = 0; i < current_room.items.length; i++)
+				for (i = 0; i < current_room.items.length; i++)
 				{
-					var considered_item = (Item)(current_room.items.getItemAt(i));
+					considered_item = (Item)(current_room.items.getItemAt(i));
 					if (player.overlaps(considered_item))
-						trace("insert item description");
+						considered_item.doAction(player, current_room);
 				}
 			}
 

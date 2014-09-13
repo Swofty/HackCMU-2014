@@ -61,7 +61,7 @@ package
 		 * @param	template_item
 		 */
 		public function instantiateTemplateItem(template_item:Item):void {
-			if (template_item instanceof Door) {
+			if (template_item is Door) {
 				var template_door:Door = template_item as Door;
 				if (template_door.door_type == Door.FUNCTION) {
 					createFunctionDoorSet(template_door);
@@ -82,7 +82,7 @@ package
 		 * its associated_parent specified to be the current Room.
 		 * @param	template_door the template function door to create and instance of
 		 */
-		public function createFunctionDoorSet(template_door:Door) {
+		public function createFunctionDoorSet(template_door:Door):void {
 			var door_x:int = 0; // TODO
 			var door_y:int = 0; // TODO
 			var wall:int = TOP; // TODO
