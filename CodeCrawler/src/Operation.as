@@ -1,7 +1,7 @@
 package 
 {
 	import flash.display.InterpolationMethod;
-	import flash.utils; //added
+	import flash.utils.*; //added
 	import mx.formatters.StringFormatter;
 	
 	/**
@@ -25,12 +25,12 @@ package
 			this.return_item = null;
 		}
 		
-		public function setLeftInput(left:Item, label:String) {
+		public function setLeftInput(left:Constant, label:String) {
 			left_arg = left;
 			left_label = label;
 		}
 		
-		public function setRightInput(right:Item, label:String) {
+		public function setRightInput(right:Constant, label:String) {
 			right_arg = right;
 			right_label = label;
 		}

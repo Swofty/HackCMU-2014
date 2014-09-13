@@ -14,7 +14,7 @@ package
 		public var false_results:ArrayList; //This is an ArrayList of items
 
 		
-		public function ConditionChest(operator:Function, x:int, y:int) {
+		public function ConditionChest(operator:Operation, x:int, y:int) {
 			super(x, y);
 			loadGraphic(closedChest);
 			this.operator = operator;
@@ -22,16 +22,21 @@ package
 			this.false_results = new ArrayList();
 		}
 		
-		public function addTrueItems(
-		
-		override public function getDescription():String {
-			return "Value: " + value;
-		}
-		
 		override public function cloneAt(x:int, y:int):Item {
-			return new ConditionChest(this.operator, this.true_results, this.false_results, x, y);
+			var result:ConditionChest = new ConditionChest(this.operator, x, y);
+			var copy_true_results:ArrayList = new ArrayList();
+			var copy_false_results:ArrayList = new ArrayList();
+			for (var i:int = 0; i < true_results.length; i++) {
+				copy_true_results.setItemAt((Item)(true_results.getItemAt(i)).cloneAt(x, y), i);
+			}
+			for (var i:int = 0; i < false_results.length; i++) {
+				copy_false_results.setItemAt((Item)(false_results.getItemAt(i)).cloneAt(x, y), i);
+			}
+			result.true_results = copy_true_results;
+			result.false_results = copy_false_results;
+			return result;
 		}
-		
+		/*
 		override public function doAction(player:Player, room:Room):void
 		{
 			var restore_variable_list:ArrayList = player.variable_list
@@ -76,6 +81,7 @@ package
 		override public function toString():String {
 			return "Value: " + value;
 		}
+		*/
 	}
 	
 }

@@ -2,6 +2,8 @@ package
 {
 	import flash.utils.Dictionary;
 	import mx.collections.ArrayList;
+	import flash.events.Event;
+	import flash.net.*;
 	/**
 	 * ...
 	 * @author Swifty
@@ -12,16 +14,17 @@ package
 		public var gd:GameData;
 		public var numArgsDict:Dictionary;
 		public var functionMap:Dictionary;
+		public var loader:URLLoader;
 		
 		public function Parser() 
 		{
 			arrayInit();
 			
 			// Define the path to the text file.
-			var url:URLRequest = new URLRequest("file.txt");
+			var url:URLRequest = new URLRequest("../assets/outputs.ccr");
 
 			// Define the URLLoader.
-			var loader:URLLoader = new URLLoader();
+			loader = new URLLoader();
 			loader.load(url);
 
 			// Listen for when the file has finished loading.
@@ -42,28 +45,26 @@ package
 			numArgsDict["ge"] = 2;
 			numArgsDict["le"] = 2;
 			numArgsDict["call"] = 1;
-			
-			functionMap = new Dictionary();
-			functionMap["return"] =
-				function (values:Array) {};
 		}
 		
 		public function loaderComplete(e:Event):void
 		{
 			// The output of the text file is available via the data property
 			// of URLLoader.
+			trace("data:\n" + this.data)
 			this.data = loader.data;
 			gd = new GameData();
 			gd.room_layout_list = new ArrayList();
 			gd.main_room_layout = new RoomLayout("main");
+			parse(this.data);
 		}
 		
-		public function parse(stream:String) {
+		public function parse(stream:String) : void {
 			while(stream.length > 0) {
 				var split:Array = data.split("\n", 2);
 				var line:String = split[0] as String;
 				var remain:String = split[1] as String;
-				var tokens:String = line.split(" ");
+				var tokens:Array = line.split(" ");
 				if (tokens[0] == "start") {
 					if (tokens[1] == "room") {
 						var name = tokens[2];
@@ -75,31 +76,32 @@ package
 					}
 				}
 				else { // main function?
-					parseExpression(gd.main_room_layout.template_items, tokens, 0);
+					var exp_list:ArrayList = new ArrayList(tokens);
+					parseExpression(gd.main_room_layout.template_items, exp_list, 0);
 				}
 			}
 		}
 		
-		public function parseCondition(stream:String) : void {			
+		public function parseCondition(stream:String) : ConditionChest {			
 			var first_chest:ConditionChest = null;
 			var curr_chest:ConditionChest = null;
 			var item_list:ArrayList = null;
 			while (stream.length > 0) {
-				var split:String = stream.split("\n", 2);
+				var split:Array = stream.split("\n", 2);
 				var line:String = split[0] as String;
 				var remain:String = split[1] as String;
-				var tokens:String = line.split(" ");
+				var tokens:Array = line.split(" ");
 				if (tokens[0] == "if" || tokens[0] == "elif" || tokens[0] == "else") {
 					var func:Operation;
 					if (tokens[1] == "eq") {
 							func = new Operation(tokens[1], 0, 0);
-							func.setLeftInput(null);
-							func.setRightInput(new Constant("int", parseInt(tokens[3]), 0, 0));
+							func.setLeftInput(null, tokens[2]);
+							func.setRightInput(new Constant("int", parseInt(tokens[3]), 0, 0), tokens[3]);
 					}
 					else {
 						func = new Operation("eq", 0, 0);
-						func.setLeftInput(null);
-						func.setRightInput(new Constant("int", parseInt(tokens[3]), 0, 0));
+						func.setLeftInput(null, tokens[2]);
+						func.setRightInput(new Constant("int", 0, 0, 0), String(0));
 					}
 					if (curr_chest == null) {
 						first_chest = new ConditionChest(func, 0, 0); 
@@ -109,7 +111,7 @@ package
 					else {
 						if (tokens[0] == "elif") {
 							var new_chest:ConditionChest = new ConditionChest(func, 0, 0);
-							curr_chest.false_results.addItem = new_chest;
+							curr_chest.false_results.addItem(new_chest);
 							curr_chest = new_chest;
 							item_list = new_chest.true_results;
 						}
@@ -134,25 +136,21 @@ package
 			return first_chest;
 		}
 		
-		public function parseItems(stream:String) : ArrayList {
-			var items:ArrayList = new ArrayList();
-		}
-		
 		/**
 		 * TODO
 		 * Creates a room layout. Instaniates non-visible objects that represent template items
 		 * to create a blueprint for the room
 		 * */
-		public function parseRoomLayout(name:String, stream:String) : void {
+		public function parseRoomLayout(name:String, stream:String) : RoomLayout {
 			trace("Constructing RoomLayout for function" + name);
 			var layout:RoomLayout = new RoomLayout(name);
 			this.gd.room_layout_list.addItem(layout);
 			
 			while (stream.length > 0) {
-				var split:String = stream.split("\n", 2);
+				var split:Array = stream.split("\n", 2);
 				var line:String = split[0] as String;
 				var remain:String = split[1] as String;
-				var tokens:String = line.split(" ");
+				var tokens:Array = line.split(" ");
 				
 				trace ("Current line: " + line);
 				if (tokens[0] == "parameter") {
@@ -177,47 +175,49 @@ package
 		public function parseExpression(item_list:ArrayList, args:ArrayList, i:int) : Item
 		{
 			//return add call fib 1 sub var x const 1 call fib 1 sub var x const 2
-			term = args.getItemAt(i);
+			var term = args.getItemAt(i);
 			if(term is String && term == "const"){
-				args.setItemAt(i) = args.getItemAt(i + 1);
+				args.setItemAt(args.getItemAt(i + 1), i);
 				args.removeItemAt(i + 1);
-				return Constant("int", parseInt(args.getItemAt(i)), 0, 0);
+				var val:int = parseInt((String)(args.getItemAt(i)));
+				return new Constant("int", val, 0, 0);
 			}
 			else if(term is String && term == "var"){
 				args.setItemAt(args.getItemAt(i + 1), i);
 				args.removeItemAt(i + 1);
-				return VariableBucket(args.getItemAt(i), null, 0, 0);
+				return new VariableBucket((String)(args.getItemAt(i)), null, 0, 0);
 			}
 			else if (term is String && term == "call") {
-				var numParams:int = args.getItemAt(i + 2);
+				var numParams:int = int((String)(args.getItemAt(i + 2)));
 				args.removeItemAt(i + 2);
-				for (var j:int = 0; j < numArgs; j++) {
-					parseExpression(args, i + j + 2);
+				for (var j:int = 0; j < numParams; j++) {
+					parseExpression(item_list, args, i + j + 2);
 				}
 				var room_layout:RoomLayout = null;
 				for (var j:int = 0; j < gd.room_layout_list.length; j++) {
-					if (((RoomLayout) gd.room_layout_list[j]).layout_name == args.getItemAt(i + 1))
-						room_layout = (RoomLayout) gd.room_layout_list[j];
+					if ((RoomLayout)(gd.room_layout_list[j]).layout_name == args.getItemAt(i + 1))
+						room_layout = (RoomLayout) (gd.room_layout_list[j]);
 				}
 				
 				item_list.addItem(new Door(room_layout, 0, 0));
-				var v:Item = VariableBucket(args.getItemAt(i + 1), null, 0, 0);
+				var v:Item = new VariableBucket((String)(args.getItemAt(i + 1)), null, 0, 0);
 				
 				args.removeItemAt(i + 1)
 				args.setItemAt(v, i);
-				for (var j:int; j < numArgs; j++) {
+				for (var j:int; j < numParams; j++) {
 					args.removeItemAt(j + 1);
 				} //removes arguments
 				return v;
 			}
 			else {
 				trace("parseExpression else case -- term: " + term);
-				numArgs = this.numArgsDict[term];
+				var numArgs:int = this.numArgsDict[term];
 				var values:Array = new Array();
 				for(var j:int = 0; j<numArgs; j++){
-					values.push(this.parseExpression(args, i+j+1));
+					values.push(this.parseExpression(item_list, args, i+j+1));
 				}
-				var v:Item = item_list.addItem(new Operation(term, 0, 0));
+				var v:Item = new Operation(term, 0, 0);
+				item_list.addItem(v);
 				args.setItemAt(v, i);
 				for (var j:int; j < numArgs; j++) {
 					args.removeItemAt(j + 1);
