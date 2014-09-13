@@ -17,6 +17,9 @@ def parseExpr(expr):
             elif("*" in ex): return " mul {0} {1} ".format(*ex.split("*"))
             elif("/" in ex): return " div {0} {1} ".format(*ex.split("/"))
             elif("**" in ex): return " pow {0} {1} ".format(*ex.split("**"))
+            elif("==" in ex): return " eq {0} {1} ".format(*ex.split("=="))
+            elif(">" in ex): return " gt {0} {1} ".format(*ex.split(">"))
+            elif("<" in ex): return " lt {0} {1} ".format(*ex.split("<"))
             else: return " " + ex + " "
         else:
             return " ".join([evalExpr(part) for part in ex.split(",")])
@@ -36,17 +39,16 @@ def parseExpr(expr):
     allTerms = expr.split()
     for i in range(len(allTerms)):
         term = allTerms[i]
-        if(term in ["add", "sub", "mul", "div", "pow"]): continue
+        if(term in ["add", "sub", "mul", "div", "pow", "eq", "gt", "lt"]): continue
         elif(term in DEFINED_VARS or term in FUNC_PARAM_VARS): allTerms[i] = "var " + term
         elif(term in FUNCARGS): allTerms[i] = "call "+term+(" {}".format(FUNCARGS[term]))
+        else: allTerms[i] = "const " + term
             
     final = " ".join(allTerms)
     return final
-    
 
 
 def hDef(output, line):
-    
     global INSIDE_FUNCTION_DEF
     global FUNC_PARAM_VARS
     INSIDE_FUNCTION_DEF += 1
@@ -89,13 +91,15 @@ def hIf(output, line):
     else:
         meat = None
     boolCond = line[indexIf+2:indexColon]
+    """
     boolCond = boolCond.replace("(","").replace(")","")
     if ("==" in boolCond): op = "=="
     elif (">" in boolCond): op = ">"
     elif ("<" in boolCond): op = "<"
     varName, const = boolCond.split(op)
-    
-    output.write("if "+ op + " " + varName +" "+ const+"\n")
+    """
+    ex = parseExpr(boolCond)
+    output.write("if "+ex+"\n")
     return indent,meat
     
 def hElif(output, line):
@@ -109,12 +113,16 @@ def hElif(output, line):
     else:
         meat = None
     boolCond = line[indexIf+4:indexColon]
+    """
     boolCond = boolCond.replace("(","").replace(")","")
     if ("==" in boolCond): op = "=="
     elif (">" in boolCond): op = ">"
     elif ("<" in boolCond): op = "<"
     varName, const = boolCond.split(op)
     output.write("elif "+ op + " " + varName +" "+ const +"\n")
+    """
+    ex = parseExpr(boolCond)
+    output.write("elif "+ex+"\n")
     return indent,meat
     
 def hElse(output, line):
