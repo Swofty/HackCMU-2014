@@ -8,9 +8,38 @@ KEYWORDS_FUNCTIONS = {"def" : hDef,
                       "return": hReturn }
 
 DEFINED_VARS = { }
+
 INSIDE_FUNCTION_DEF = False
 
 pyFile = sys.argv[1]
+
+
+def parseExpr(expr):
+    def is_number(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
+    tempExpr = expr
+    parens = expr.count("(")
+    for each in xrange(parens):
+        startparen = expr.index("(")
+        endparen = expr.index(")")
+        for index in range(startparen:endparen+1):
+            if (not (tempExpr[index]=="(" or tempExpr[index]==")")):
+                tempExpr[index] = " "
+        tempExpr[startparen] = " "
+        tempExpr[endparen] = " "
+    tempExpr = tempexpr.strip()
+    if(tempExpr in DEFINED_VARS):
+        output.write(" var " )+ tempExpr)
+    elif(tempExpr in FUNCARGS):
+        output.write(" call " + tempExpr +" "+ FUNCARGS[tempExpr])
+    
+
+
+
 
 def hDef(output, line):
     global INSIDE_FUNCTION_DEF
@@ -111,6 +140,14 @@ def hReturn(output, line):
 OUTPUT = open("outputs.ccr", "w")
 
 def parse(lines):
+    global FUNCARGS = {}
+    for line in lines:
+        if("def" == line[:3]):
+            modLine = line[:3].lstrip()
+            funcName = modLine[:modline.index("(")].rstrip()
+            args = len(line) - len(line.replace(",", "")) + 1
+            FUNCARGS[funcName] = args
+            
     lineNumber = 0
     totalLines = len(lines)
     while(lineNumber<totalLines):
