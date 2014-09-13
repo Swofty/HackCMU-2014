@@ -1,6 +1,5 @@
 package 
-{
-	
+{	
 	import mx.collections.ArrayList;
 	import Math;
 	/**

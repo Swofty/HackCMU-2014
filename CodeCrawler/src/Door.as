@@ -13,7 +13,7 @@ package
 		//2 sprites which indicate if a door is opened or closed
 		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Entry_Door:Class;
 		[Embed(source = "../assets/gfx/lockedDoor.png")] private static var Locked_Door:Class;
-		[Embed(source = "../assets/gfx/unlockedDoor.png")] private static var Opened_Door:Class;
+		[Embed(source = "../assets/gfx/unlockedDoor.png")] private static var Unlocked_Door:Class;
 
 		/** FUNCTION doors represent a function call, the linked_room
 		 * should be the room that the function call will generates.
@@ -60,6 +60,13 @@ package
 			loadGraphic(Locked_Door, true, true,50,50);
 		}
 		
+		public function openDoor():void
+		{
+			this.isLocked = false;
+			this.solid = false;
+			loadGraphic(Unlocked_Door, true, true, 50, 50);
+		}
+		
 		/**
 		 * Sets the necessary variables for a function_call door with the
 		 * correct remaining variables. This is here to help make sure that
@@ -75,6 +82,14 @@ package
 			this.associated_buckets = buckets;
 		}
 		
+		/**
+		 * Returns the String description to be displayed in the "Op Box."
+		 * @return the String description to be displayed
+		 */
+		override public function getDescription() : String {
+			return "operator stuff";
+		}
+		
 		/** Don't think this ever needs to be used */
 		override public function cloneAt(x:int, y:int):Item {
 			var new_door:Door = new Door(this.linked_room_layout, x, y);
@@ -85,5 +100,12 @@ package
 			return new_door;
 		}
 		
+		override public function doAction(player:Player, room:Room):void {
+			openDoor();
+		}
+		
+		override public function toString():String {
+			return "operator stuff";
+		}
 	}
 }

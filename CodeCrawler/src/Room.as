@@ -102,19 +102,19 @@ package
 			
 			var bucket_offset_x:int = 0;
 			var bucket_offset_y:int = 0;
-			if (wall == TOP) {
+			if (wall == LEFT) {
 				bucket_offset_x = this._tileWidth;
 				bucket_offset_y = 0;
 			}
-			else if (wall == RIGHT) {
+			else if (wall == TOP) {
 				bucket_offset_x = 0;
 				bucket_offset_y = this._tileHeight;
 			}
-			else if (wall == BOTTOM) {
+			else if (wall == RIGHT) {
 				bucket_offset_x = -1 * this._tileWidth;
 				bucket_offset_y = 0;
 			}
-			else if (wall == LEFT) {
+			else if (wall == BOTTOM) {
 				bucket_offset_x = 0;
 				bucket_offset_y = -1 * this._tileHeight;
 			}
@@ -122,9 +122,10 @@ package
 			var buckets:ArrayList = new ArrayList();
 			for (var i:int = 0; i < layout.param_names.length; i++)
 			{
-				var bucket_x:int = bucket_offset_x * (i + 1);
-				var bucket_y:int = bucket_offset_y * (i + 1);
+				var bucket_x:int = door_x + bucket_offset_x;
+				var bucket_y:int = door_y + bucket_offset_y;
 				var bucket:VariableBucket = new VariableBucket((String)(layout.param_names.getItemAt(i)), null, bucket_x, bucket_y);
+				bucket.makeParameter(real_door);
 				items.addItem(bucket);
 				buckets.addItem(bucket);
 			}
