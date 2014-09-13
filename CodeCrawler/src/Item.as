@@ -23,6 +23,10 @@ package
 		public function cloneAt(new_x:int, new_y:int) : Item {
 			return new Item(new_x, new_y);
 		}
+		
+		public function toString():String {
+			return "Generic item";
+		}
 	}
 	
 }

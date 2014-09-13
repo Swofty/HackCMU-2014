@@ -13,10 +13,15 @@ package
 	{
 		public var template_items:ArrayList;
 		public var layout_name:String;
+		public var param_names:ArrayList;
 		
 		public function RoomLayout(function_name:String) {
 			template_items = new ArrayList();
 			layout_name = function_name;
+		}
+		
+		public function addParam(param_name:String) {
+			param_names.addItem(param_name);
 		}
 		
 		/**
@@ -34,22 +39,19 @@ package
 		 * Location of instantiated items in the room will be left to
 		 * a function in Room to determin.
 		 */
-		public function generateRoom() : Room {
-			var room:Room = new Room();
+		public function generateRoom(arg:Constant, parent:Room) : Room {
+			var room:Room = new Room(arg, parent, this.layout_name);
 			for (var i:int = 0; i < template_items.length; i++) {
 				var template_item:Item = template_items[i];
-				var spawn_x:int = room.findFreeX(template_item);
-				var spawn_y:int = room.findFreeY(template_item);
-				var real_item:Item = template_item.cloneAt(spawn_x, spawn_y);
-				room.addItem(real_item);
+				room.instantiateTemplateItem(template_item);
 			}
 			return room;
 		}
 		
 		/**
 		 * TODO
-		 * Creates a room layout. Instaniates non-visible objects
-		 * to serve as a template for the room.
+		 * Creates a room layout. Instaniates non-visible objects that represent template items
+		 * to create a blueprint for the room
 		 * */
 		public static function parseRoomLayout(stream:String) : RoomLayout {
 			return new RoomLayout("Garbage");

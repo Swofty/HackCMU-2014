@@ -25,6 +25,17 @@ package
 		override public function cloneAt(x:int, y:int):Item {
 			return new Constant(this.type, this.value, x, y);
 		}
+		
+		override public function toString():String {
+			var value_string:String;
+			if (type == "string") {
+				value_string = "\"" + this.value + "\"";
+			}
+			else {
+				value_string = this.value;
+			}
+			return value_string + " : " + this.type;
+		}
 	}
 	
 }
