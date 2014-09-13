@@ -1,0 +1,22 @@
+start room factorial
+parameter x
+start condition
+if eq var x const 0
+return const 1
+else
+return mul var x call factorial 1 sub var x const 1
+end condition
+end room
+start room fib
+parameter x
+start condition
+if eq var x const 0
+return const 1
+elif eq var x const 1
+return const 0
+else
+return add call fib 1 sub var x const 1 call fib 1 sub var x const 2
+end condition
+end room
+call fib 1 const 3
+END OF FILE
