@@ -1,6 +1,5 @@
 import sys
 
-testfile = open("testfile.txt", "w")
 
 DEFINED_VARS = { }
 FUNC_PARAM_VARS = set()
@@ -154,6 +153,7 @@ OUTPUT = open("outputs.ccr", "w")
 
 def parse(lines):
     global FUNCARGS
+    global INSIDE_FUNCTION_DEF
     for line in lines:
         if("def" == line[:3]):
             modLine = line[3:].lstrip()
@@ -166,7 +166,8 @@ def parse(lines):
     while(lineNumber<totalLines):
         
         line = lines[lineNumber]
-        if (line==line.lstrip() and lineNumber!=0):
+        if (line==line.lstrip() and lineNumber!=0 and INSIDE_FUNCTION_DEF):
+            INSIDE_FUNCTION_DEF = False
             OUTPUT.write("end_room\n")
         for kywrd in KEYWORDS:
             if kywrd in line:
@@ -213,6 +214,8 @@ def parse(lines):
                         KEYWORDS_FUNCTIONS[kywrd](OUTPUT, line)
                     except:
                         print(kywrd)
+           # else:
+               #parseExpr
         lineNumber+=1
     
 

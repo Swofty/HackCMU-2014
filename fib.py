@@ -6,3 +6,6 @@ def fib(x):
     else:
         return (fib((x)-(1)))+(fib((x)-(2)))
 "Mandatory text"
+def main():
+    fib(7)
+    return
