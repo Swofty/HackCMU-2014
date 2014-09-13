@@ -1,7 +1,6 @@
 package 
 {
 	import mx.collections.*;
-	import python_obj.Constant;
 	
 	import adobe.utils.CustomActions;
 	import flash.text.engine.ElementFormat;
@@ -34,6 +33,7 @@ package
 		private var player:Player ;
 		private var room_layout_list:ArrayList;
 		
+		private var current_room:Room;
 		private var room_title:FlxText;
 		
 		private var item_display:FlxText;
@@ -57,9 +57,11 @@ package
 			player = new Player(100, 100);
 			
 			var c:Constant = new Constant("int", 5, 1 * TILEWIDTH, 1 * TILEHEIGHT);
-			trace("helloo");
-			trace(c.visible);
-			add(c);
+
+			room_layout_list.addItem(new RoomLayout("fib"));
+			current_room = (RoomLayout)(room_layout_list.getItemAt(0)).generateRoom();
+			current_room.addItem(c);
+			add(current_room);
 			//generateMaps();	//This function will be used to generate an array of all maps we will use.
 			/*
 			while ((floor.map.getTile((player.x + TILEWIDTH) / TILEWIDTH, (player.y)/ TILEHEIGHT) != 0))
@@ -141,6 +143,15 @@ package
 					{
 						player.x -= 2;
 					}
+			}
+
+			if (FlxG.keys.SPACE)
+			{
+				for each (var item in current_room.items)
+				{
+					if (player.overlaps(item))
+						trace("yaaaay");
+				}
 			}
 			/*
 			if (FlxG.overlap(player, floor.stairGroup))

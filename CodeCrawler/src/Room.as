@@ -42,7 +42,7 @@ package
 		}
 		
 		public function findFreeY(item:Item):int {
-			return int(Math.random() * this.heightInTiles) * this._tileWidth;
+			return (int)(Math.random() * this.heightInTiles) * this._tileWidth;
 		}
 	}
 
