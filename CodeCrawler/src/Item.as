@@ -24,6 +24,10 @@ package
 			return new Item(new_x, new_y);
 		}
 		
+		public function doAction(player:Player, room:Room):void {
+			return;
+		}
+		
 		override public function toString():String {
 			return "Generic item";
 		}

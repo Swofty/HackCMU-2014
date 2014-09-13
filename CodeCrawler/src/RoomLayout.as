@@ -42,7 +42,7 @@ package
 		public function generateRoom(arg:Constant, parent:Room) : Room {
 			var room:Room = new Room(arg, parent, this.layout_name);
 			for (var i:int = 0; i < template_items.length; i++) {
-				var template_item:Item = template_items.getItemAt(i) as Item;
+				var template_item:Item = (Item)(template_items.getItemAt(i));
 				room.instantiateTemplateItem(template_item);
 			}
 			return room;

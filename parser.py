@@ -1,59 +1,55 @@
 import sys
 
-KEYWORDS = ["def", "=", "if", "return"]
-
-KEYWORDS_FUNCTIONS = {"def" : hDef,
-                      "=": hAssign,
-                      "if": hIf,
-                      "return": hReturn }
 
 DEFINED_VARS = { }
-
-INSIDE_FUNCTION_DEF = False
+FUNC_PARAM_VARS = set()
+FUNCARGS = {}
+INSIDE_FUNCTION_DEF = 0
 
 pyFile = sys.argv[1]
 
 
 def parseExpr(expr):
-    expr = expr.strip()
-    def is_number(num):
-    try:
-        float(num)
-        return True
-    except ValueError:
-        return False
-        
-    tempExpr = expr
-    parens = expr.count("(")
-    for each in xrange(parens):
-        startparen = expr.index("(")
-        endparen = expr.index(")")
-        for index in range(startparen:endparen+1):
-            if (not (tempExpr[index]=="(" or tempExpr[index]==")")):
-                tempExpr[index] = " "
-        tempExpr[startparen] = " "
-        tempExpr[endparen] = " "
-    for index in range(tempExpr):
-        if(tempExpr[index] != " "): opIndex = index
-    tempExpr = tempExpr.strip()
-    if(tempExpr in DEFINED_VARS):
-        output.write("var " )+ tempExpr+" ")
-    elif(tempExpr in FUNCARGS):
-        output.write("call " + tempExpr +" "+ FUNCARGS[tempExpr]+ " ")
-    elif(is_number(tempExpr)):
-        output.write(tempExpr + " ")
-    else:
-        output.write(tempExpr+" ")
-        parseExpr(1:opIndex-1)
-        parseExpr(opIndex+2:-1)
-    return
-
-
+    def evalExpr(ex):
+        if("," not in ex):
+            if("+" in ex): return " add {0} {1} ".format(*ex.split("+"))
+            elif("-" in ex): return " sub {0} {1} ".format(*ex.split("-"))
+            elif("*" in ex): return " mul {0} {1} ".format(*ex.split("*"))
+            elif("/" in ex): return " div {0} {1} ".format(*ex.split("/"))
+            elif("**" in ex): return " pow {0} {1} ".format(*ex.split("**"))
+            else: return " " + ex + " "
+        else:
+            return " ".join([evalExpr(part) for part in ex.split(",")])
+    
+    while("(" in expr):
+        ifrontParens = [ ]
+        pairs = [ ]
+        for i in range(len(expr)):
+            if(expr[i] == "("): ifrontParens.append(i)
+            elif(expr[i] == ")"): pairs.append((ifrontParens.pop(), i, len(ifrontParens)))
+        pairs.sort(key=lambda x:x[2]*-1)
+        pair = pairs[0]
+        deepestWithParen = expr[pair[0]:pair[1]+1]
+        deepestWithoutParen = expr[pair[0]+1:pair[1]]
+        expr = expr.replace(deepestWithParen, evalExpr(deepestWithoutParen))
+    expr = evalExpr(expr)
+    allTerms = expr.split()
+    for i in range(len(allTerms)):
+        term = allTerms[i]
+        if(term in ["add", "sub", "mul", "div", "pow"]): continue
+        elif(term in DEFINED_VARS or term in FUNC_PARAM_VARS): allTerms[i] = "var " + term
+        elif(term in FUNCARGS): allTerms[i] = "call "+term+(" {}".format(FUNCARGS[term]))
+            
+    final = " ".join(allTerms)
+    return final
+    
 
 
 def hDef(output, line):
+    
     global INSIDE_FUNCTION_DEF
-    INSIDE_FUNCTION_DEF = True
+    global FUNC_PARAM_VARS
+    INSIDE_FUNCTION_DEF += 1
     parenthIndex = line.index("(")
     secondParenth = line.index(")")
     name = line[4:parenthIndex]
@@ -61,10 +57,13 @@ def hDef(output, line):
     for i in range(len(parameters)):
         parameters[i] = parameters[i].strip()
     output.write("start room {}\n".format(name))
-    for p in parameters:
-        output.write("parameter {}\n".format(p))
+    if(parameters[0] != ""):
+        for p in parameters:
+            output.write("parameter {}\n".format(p))
+            FUNC_PARAM_VARS.add(p)
 
 def hAssign(output, line):
+    if(line.count("=")%2==0): return
     global DEFINED_VARS
     varName, varVal = line.split("=")
     varName, varVal = varName.strip(), varVal.strip()
@@ -137,14 +136,14 @@ def hIfmid(output,lines,lineNumber,indent):
         return len(l) - len(l.lstrip())
     while(getIndent(lines[lineNumber]) > indent):
         line = lines[lineNumber]
-        if(not line.isspace())
+        if(not line.isspace()):
             meat.append(line)
         lineNumber+=1
     return meat,lineNumber-1
 
     
 def hReturn(output, line):
-    line = line.remove("return").lstrip()
+    line = line.replace("return", "").lstrip()
     output.write("return "+parseExpr(line) + "\n")
     return
     
@@ -154,63 +153,90 @@ def hReturn(output, line):
 OUTPUT = open("outputs.ccr", "w")
 
 def parse(lines):
-    global FUNCARGS = {}
+    global FUNCARGS
+    global INSIDE_FUNCTION_DEF
+    ifd_startval = INSIDE_FUNCTION_DEF
     for line in lines:
         if("def" == line[:3]):
-            modLine = line[:3].lstrip()
-            funcName = modLine[:modline.index("(")].rstrip()
-            args = len(line) - len(line.replace(",", "")) + 1
+            modLine = line[3:].lstrip()
+            funcName = modLine[:modLine.index("(")].rstrip()
+            args = line.count(",") + 1
             FUNCARGS[funcName] = args
             
     lineNumber = 0
     totalLines = len(lines)
     while(lineNumber<totalLines):
+        kywrdFound = False
         line = lines[lineNumber]
+        if (line==line.lstrip() and lineNumber!=0 and INSIDE_FUNCTION_DEF):
+            INSIDE_FUNCTION_DEF -= 1
+            OUTPUT.write("end room\n")
         for kywrd in KEYWORDS:
             if kywrd in line:
-                if(kywrd == "if" && ("elif" not in line)):
-                    indent,meat = hIf(output, line)
+                kywrdFound = True
+                if(kywrd == "if" and ("elif" not in line) and line.strip().startswith("if")):
+                    
+                    indent,meat = hIf(OUTPUT, line)
                     if(meat == None):
-                        meat,lineNumber = fIfmid(output,lines,lineNumber+1,indent)
+                        meat,lineNumber = hIfmid(OUTPUT,lines,lineNumber+1,indent)
+                    
                     parse(meat)
                     a = 1
                     ltemp = lines[lineNumber+a]
-                    while(ltemp.isspace())
+                    while(ltemp.isspace()):
                         a+=1
                         ltemp=lines[lineNumber+a]
                     if not("elif" in ltemp or "else" in ltemp):
                         OUTPUT.write("end condition\n")
-                elif(kywrd == "elif"):
-                    indent,meat = hElif(output, line)
+                elif(kywrd == "elif" and line.strip().startswith("elif")):
+                    
+                    indent,meat = hElif(OUTPUT, line)
                     if(meat == None):
-                        meat,lineNumber = fIfmid(output,lines,lineNumber+1,indent)
+                        meat,lineNumber = hIfmid(OUTPUT,lines,lineNumber+1,indent)
                     parse(meat)
                     a = 1
                     ltemp = lines[lineNumber+a]
-                    while(ltemp.isspace())
+                    while(ltemp.isspace()):
                         a+=1
                         ltemp=lines[lineNumber+a]
                     if not("elif" in ltemp or "else" in ltemp):
                         OUTPUT.write("end condition\n")
-                elif(kywrd == "else"):
-                    indent,meat = hElse(output, line)
+                elif(kywrd == "else" and line.strip().startswith("else")):
+                    
+                    indent,meat = hElse(OUTPUT, line)
                     if(meat == None):
-                        meat,lineNumber = fIfmid(output,lines,lineNumber+1,indent)
+                        meat,lineNumber = hIfmid(OUTPUT,lines,lineNumber+1,indent)
                     parse(meat)
+                    
                     OUTPUT.write("end condition\n")
+                elif(kywrd == "if" and "elif" in line):
+                    continue
                     
                 else:
-                    try:
-                        KEYWORDS_FUNCTIONS[kywrd](f, line)
-                    except:
-                        #if/elif catch issue
-                    
+                    KEYWORDS_FUNCTIONS[kywrd](OUTPUT, line)
+        if not(kywrdFound or line.isspace()):
+            res = parseExpr(line)
+            OUTPUT.write(res + "\n")
         lineNumber+=1
+    if(INSIDE_FUNCTION_DEF > ifd_startval):
+        INSIDE_FUNCTION_DEF -= 1
+        OUTPUT.write("end room\n")
+    
+
+    
 with open(pyFile, "r") as pf:
     pflines = pf.readlines()
    
+KEYWORDS = ["def", "=", "if", "elif", "else", "return"]
 
+KEYWORDS_FUNCTIONS = {"def" : hDef,
+                      "=": hAssign,
+                      "if": hIf,
+                      "elif" : hElif,
+                      "else" : hElse,
+                      "return": hReturn }
 parse(pflines)
+OUTPUT.write("END OF FILE\n")
 
 OUTPUT.close()
 

@@ -10,7 +10,7 @@ package
 	{
 		public function CodeCrawler() 
 		{
-			super(800, 600, StartState, 1);
+			super(1200, 750, StartState, 1);
 		}
 	}
 
