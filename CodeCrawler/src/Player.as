@@ -17,10 +17,14 @@ package
 			super(X,Y);
 			loadGraphic(CharacterSprite, true, true,50,50);
 			
+			//initialize the lists;
+			variable_list = new ArrayList();
+			constant_list = new ArrayList();
+			
 			//Phsysics[!?]
 			maxVelocity.x = 300;
 			maxVelocity.y = 600;
-			 
+			
 			addAnimation("move_right", [0, 1], 5,true);			//self explanatory
 			addAnimation("move_up", [2, 3], 5,true);			//self explanatory
 			addAnimation("move_left", [4,5], 5,true);			//self explanatory

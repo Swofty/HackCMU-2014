@@ -11,7 +11,7 @@ package
 		public var type:String;
 		public var value;
 		
-		public function Constant(type, value, x, y) {
+		public function Constant(type:String, value, x:int, y:int) {
 			super(x, y);
 			loadGraphic(sprite);
 			this.type = type;
@@ -24,6 +24,14 @@ package
 		
 		override public function cloneAt(x:int, y:int):Item {
 			return new Constant(this.type, this.value, x, y);
+		}
+		
+		override public function doAction(player:Player, room:Room):void
+		{
+			player.constant_list.addItem(this);
+			this.visible = false;
+			room.items.removeItem(this);
+			this.kill();
 		}
 		
 		override public function toString():String {
