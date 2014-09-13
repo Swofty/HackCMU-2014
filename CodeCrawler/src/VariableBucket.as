@@ -44,6 +44,14 @@ package
 				return new VariableBucket(this.name, (Constant)(value.cloneAt(new_x, new_y)), new_x, new_y);
 		}
 		
+		override public function doAction(player:Player, room:Room):void
+		{
+			player.variable_list.addItem(this);
+			this.visible = false;
+			room.items.removeItem(this);
+			this.kill();
+		}
+		
 		override public function toString():String {
 			var value_string:String;
 			if (value == null) {
