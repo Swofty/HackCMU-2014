@@ -1,6 +1,7 @@
 package 
 {
 	import mx.collections.*;
+	import python_obj.Constant;
 	
 	import adobe.utils.CustomActions;
 	import flash.text.engine.ElementFormat;
@@ -10,6 +11,7 @@ package
 	import org.flixel.*;
 	import flash.display.Graphics;
 	import flash.utils.getQualifiedSuperclassName; //used to figure out the super class of some classes
+	
 	public class OverworldState extends FlxState
 	{
 		FlxG.debug;
@@ -18,23 +20,11 @@ package
 		private const TILEWIDTH:uint = 50;
 		private const TILEHEIGHT:uint = 50;
 		
-		//used to generate a map which determines which tiles to set ***********[maps need to be made]
-		//public var spec:String;
+		private var map:FlxTilemap;	//stores the actual map that is uploaded		
+		[Embed(source = '../assets/maps/test.txt', mimeType = 'application/octet-stream')] var map_data:Class; //stores the string that the map is made out of
 		
-		private var map:FlxTilemap;	//stores the actual map that is uploaded
-		private var mapdata:String; //stores the string that the map is made out of
-		
-		private var floor:Floor; 	//stores the map and things associated with it.
-		private var floorArray:Array; //stores all of the maps we will possibly use
-		
-		private var floorParentArray:Array; //stores the names of the parents of each floor
-		private var floorNameArray:Array; //stores the name of each floor
-		
-		//Embed generate graphic tileset to use
-		[Embed(source = '../assets/gfx/wall.png')] private var Tiles:Class;
-		
-		//Embed generate graphic tileset to use
-		[Embed(source = '../assets/gfx/floor.png')] private var FloorTiles:Class;
+		[Embed(source = '../assets/gfx/wall.png')] private var Wall_Tiles:Class;		//Embed wall tileset to use
+		[Embed(source = '../assets/gfx/floor.png')] private var Floor_Tiles:Class;		//Embed floor tileset to use
 		
 		//******Background Music*****************************
 		//Hyrule Temple
@@ -45,20 +35,31 @@ package
 		private var room_layout_list:ArrayList;
 		
 		private var room_title:FlxText;
-		//private var current_room:Room;
 		
-		override public	 function create():void 
+		private var item_display:FlxText;
+		private var constant_display:FlxText;
+		private var expression_display:FlxText;
+
+		private var code_display:FlxText;
+		private var code_tracker:FlxSprite;
+		
+		override public function create():void 
 		{	
 			//****MUSIC AND SFX******************************
 			FlxG.play(OverworldBGM);
 			
 			//**********Mapping shit*************************
-			[Embed(source = '../assets/maps/test.txt', mimeType = 'application/octet-stream')] var floor_data:Class;
 			map = new FlxTilemap();
-			map.loadMap(new floor_data, FloorTiles, TILEWIDTH, TILEHEIGHT);
+			
+			map.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);
 			add(map);
 			
 			player = new Player(100, 100);
+			
+			var c:Constant = new Constant("int", 5, 1 * TILEWIDTH, 1 * TILEHEIGHT);
+			trace("helloo");
+			trace(c.visible);
+			add(c);
 			//generateMaps();	//This function will be used to generate an array of all maps we will use.
 			/*
 			while ((floor.map.getTile((player.x + TILEWIDTH) / TILEWIDTH, (player.y)/ TILEHEIGHT) != 0))
@@ -234,7 +235,7 @@ package
 			add(this.floor.stairGroup);
 		}
 		*/
-		
+		/*
 		public function generateStairs():void
 		{
 			for (var i: int = 0; i < floorArray.length; i++)
@@ -272,6 +273,7 @@ package
 			}
 			return;
 		}
+		*/
 		/*
 		public function generateEnemies():void
 		{
@@ -315,6 +317,7 @@ package
 			add(enemyGroup);
 		}
 		*/
+		/*
 		//This function will load a map and insert the appropriate stairs
 		public function loadMap(floorChange:Floor):void
 		{
@@ -324,8 +327,10 @@ package
 			add(floor.map);
 			add(floor.stairGroup);
 		}
+		*/
 		//This function will look for stais, designated by the tile 2
 		//We know there must be a stair here
+		/*
 		public function findStairs(floormap:FlxTilemap):FlxPoint
 		{
 			for (var i:int = 0; i < floormap.widthInTiles; i++)
@@ -341,5 +346,6 @@ package
 			}
 			return new FlxPoint( -1000, -1000);
 		}
+		*/
 	}	
 }
