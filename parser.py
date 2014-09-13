@@ -15,12 +15,14 @@ pyFile = sys.argv[1]
 
 
 def parseExpr(expr):
+    expr = expr.strip()
     def is_number(num):
     try:
         float(num)
         return True
     except ValueError:
         return False
+        
     tempExpr = expr
     parens = expr.count("(")
     for each in xrange(parens):
@@ -31,12 +33,20 @@ def parseExpr(expr):
                 tempExpr[index] = " "
         tempExpr[startparen] = " "
         tempExpr[endparen] = " "
-    tempExpr = tempexpr.strip()
+    for index in range(tempExpr):
+        if(tempExpr[index] != " "): opIndex = index
+    tempExpr = tempExpr.strip()
     if(tempExpr in DEFINED_VARS):
-        output.write(" var " )+ tempExpr)
+        output.write("var " )+ tempExpr+" ")
     elif(tempExpr in FUNCARGS):
-        output.write(" call " + tempExpr +" "+ FUNCARGS[tempExpr])
-    
+        output.write("call " + tempExpr +" "+ FUNCARGS[tempExpr]+ " ")
+    elif(is_number(tempExpr)):
+        output.write(tempExpr + " ")
+    else:
+        output.write(tempExpr+" ")
+        parseExpr(1:opIndex-1)
+        parseExpr(opIndex+2:-1)
+    return
 
 
 
@@ -58,12 +68,13 @@ def hAssign(output, line):
     global DEFINED_VARS
     varName, varVal = line.split("=")
     varName, varVal = varName.strip(), varVal.strip()
-    if not('"' in varVal or "'" in varVal):
-        try:
-            float(varVal)
-            break
-        except ValueError:
-            varVal = DEFINED_VARS[varVal]
+    varVal = parseExpr(varVal)
+    #if not('"' in varVal or "'" in varVal):
+    #    try:
+    #        float(varVal)
+    #        break
+    #    except ValueError:
+    #        varVal = DEFINED_VARS[varVal]
     DEFINED_VARS[varName] = varVal
     return varName, varVal
 
@@ -133,10 +144,13 @@ def hIfmid(output,lines,lineNumber,indent):
 
     
 def hReturn(output, line):
-    
-    #output.write("
+    line = line.remove("return").lstrip()
+    output.write("return "+parseExpr(line) + "\n")
+    return
     
 
+    
+    
 OUTPUT = open("outputs.ccr", "w")
 
 def parse(lines):
@@ -154,7 +168,7 @@ def parse(lines):
         line = lines[lineNumber]
         for kywrd in KEYWORDS:
             if kywrd in line:
-                if(kywrd == "if"):
+                if(kywrd == "if" && ("elif" not in line)):
                     indent,meat = hIf(output, line)
                     if(meat == None):
                         meat,lineNumber = fIfmid(output,lines,lineNumber+1,indent)
@@ -186,8 +200,10 @@ def parse(lines):
                     OUTPUT.write("end condition\n")
                     
                 else:
-                    KEYWORDS_FUNCTIONS[kywrd](f, line)
-                    
+                    try:
+                        KEYWORDS_FUNCTIONS[kywrd](f, line)
+                    except:
+                        #if/elif catch issue
                     
         lineNumber+=1
 with open(pyFile, "r") as pf:
