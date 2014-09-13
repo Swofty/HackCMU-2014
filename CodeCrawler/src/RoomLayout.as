@@ -53,7 +53,29 @@ package
 		 * Creates a room layout. Instaniates non-visible objects that represent template items
 		 * to create a blueprint for the room
 		 * */
-		public static function parseRoomLayout(stream:String) : RoomLayout {
+		public static function parseRoomLayout(name:String, stream:String) : RoomLayout {
+			var layout:RoomLayout = new RoomLayout(name);
+			
+			while (stream.length > 0) {
+				var split:String = stream.split("\n", 2);
+				var line:String = split[0] as String;
+				var remain:String = split[1] as String;
+				var tokens:String = line.split(" ");
+				
+				if (tokens[0] == "parameter") {
+					layout.addParam(tokens[1]);
+					stream = remain;
+				}
+				else if (tokens[0] == "start" && tokens[1] == "condition") {
+					var end_index:int = remain.indexOf("end condition\n");
+					var chest:ConditionChest = ConditionChest.parseConditionChest(remain.substring(0, end_index));
+					layout.addTemplateItem(chest);
+					stream = remain.substring(end_index + "end condition\n".length);
+				}
+				else if (tokens[0] == "return") {
+					var door:Door = new Door();
+				}
+			}
 			return new RoomLayout("Garbage");
 		}
 	}
