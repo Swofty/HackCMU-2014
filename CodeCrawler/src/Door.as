@@ -12,8 +12,8 @@ package
 
 		//2 sprites which indicate if a door is opened or closed
 		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Entry_Door:Class;
-		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Locked_Door:Class;
-		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Opened_Door:Class;
+		[Embed(source = "../assets/gfx/unlockedDoor.png")] private static var Locked_Door:Class;
+		[Embed(source = "../assets/gfx/lockedDoor.png")] private static var Opened_Door:Class;
 
 		/** FUNCTION doors represent a function call, the linked_room
 		 * should be the room that the function call will generates.

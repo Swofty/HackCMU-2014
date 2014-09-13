@@ -7,7 +7,7 @@ package
 	 */
 	public class Constant extends Item
 	{
-		[Embed(source = "../assets/gfx/Bitman.png")] private static var sprite:Class;
+		[Embed(source = "../assets/gfx/coin.png")] private static var sprite:Class;
 		public var type:String;
 		public var value;
 		

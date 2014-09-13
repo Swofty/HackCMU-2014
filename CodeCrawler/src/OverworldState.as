@@ -36,7 +36,7 @@ package
 		private var current_room:Room;
 		private var room_title:FlxText;
 		
-		private var item_display:FlxText;
+		private var variable_display:FlxText;
 		private var constant_display:FlxText;
 		private var expression_display:FlxText;
 
@@ -66,11 +66,11 @@ package
 			
 			add(current_room);
 			
-			add((Item)(current_room.items.getItemAt(0)));
-			for each (var item:Item in current_room.items)
+			//add((Item)(current_room.items.getItemAt(0)));
+			for (var i:int = 0; i < current_room.items.length; i++)
 			{
 				trace("hellO");
-				add(item);
+				add((Item)(current_room.items.getItemAt(i)));
 			}
 			
 			//generateMaps();	//This function will be used to generate an array of all maps we will use.
@@ -107,6 +107,26 @@ package
 			room_title = new FlxText(player.x-100, player.y-10, 200, "hello title!")//floorArray[0].name)
 			add(room_title);
 			
+			variable_display = new FlxText(0, 600, 200, "variables!")//floorArray[0].name)
+			variable_display.size = 2 * variable_display.size;
+			constant_display = new FlxText(200, 600, 200, "constants!")//floorArray[0].name)
+			constant_display.size = 2 * constant_display.size;
+			expression_display = new FlxText(400, 600, 400, "expressions!")//floorArray[0].name)
+			expression_display.size = 2 * expression_display.size;
+			
+			code_display = new FlxText(800, 0, 150, "code!")
+			code_display.size = 2 * code_display.size;
+			
+			code_tracker = new FlxSprite(800, 0);
+			code_tracker.width = 400;
+			code_tracker.alpha = 0.5;
+			
+			add(variable_display);
+			add(constant_display);
+			add(expression_display);
+			add(code_display);
+			add(code_tracker);
+			
 			super.create();
 		}
 		override public function update():void 
@@ -116,55 +136,70 @@ package
 			room_title.y = player.y - 30;
 			*/
 			//This stuff collides the player with the map, it smooths edges to stop annoying derpy things. 
-			if (FlxG.collide(player, map))
+			if (FlxG.collide(player, current_room))
 			{
 				//This smooths a play's maneuverying around square objects if they are colliding on the top when they want to move sideways
-				if ((map.getTile((player.x + player.width) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + player.width) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
-					|| (map.getTile((player.x-1) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
-					&& map.getTile((player.x-1) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
+				if ((current_room.getTile((player.x + player.width) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + player.width) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
+					|| (current_room.getTile((player.x-1) / TILEWIDTH, (player.y) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x-1) / TILEWIDTH, (player.y + (2 * player.height / 3)) / TILEHEIGHT) == 0)
 					)
 					{
 						player.y += 2;
 					}	
 				//This smooths a play's maneuverying around square objects if they are colliding on the bottom when they want to move sideways
-				if ((map.getTile((player.x + player.width) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + player.width) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
-					|| (map.getTile((player.x-1) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
-					&& map.getTile((player.x-1) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
+				if ((current_room.getTile((player.x + player.width) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + player.width) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
+					|| (current_room.getTile((player.x-1) / TILEWIDTH, (player.y + player.height-1) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x-1) / TILEWIDTH, (player.y + (player.height / 3)) / TILEHEIGHT) == 0)
 					)
 					{
 						player.y -= 2;
 					}
 				//This smooths a play's maneuverying around square objects if they are colliding on the left when they want to move vertically
-				if ((map.getTile((player.x) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
-					|| (map.getTile((player.x) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) == 0)
+				if ((current_room.getTile((player.x) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
+					|| (current_room.getTile((player.x) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + (2*player.width)/3) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) == 0)
 					)
 					{
 						player.x += 2;
 					}
 				//This smooths a play's maneuverying around square objects if they are colliding on the right when they want to move vertically
-				if ((map.getTile((player.x + player.width-1) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + (player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
-					|| (map.getTile((player.x + player.width-1) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
-					&& map.getTile((player.x + (player.width/3)) / TILEWIDTH, (player.y + player.height) / TILEHEIGHT) == 0)
+				if ((current_room.getTile((player.x + player.width-1) / TILEWIDTH, (player.y-1) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + (player.width)/3) / TILEWIDTH, (player.y-1) / TILEHEIGHT) == 0)
+					|| (current_room.getTile((player.x + player.width-1) / TILEWIDTH, (player.y+player.height) / TILEHEIGHT) != 0
+					&& current_room.getTile((player.x + (player.width/3)) / TILEWIDTH, (player.y + player.height) / TILEHEIGHT) == 0)
 					)
 					{
 						player.x -= 2;
 					}
 			}
-/*
-			if (FlxG.keys.SPACE)
+
+			var overAnItem:Boolean = false;	//hacky way to check if we are over an item in this step
+			for (var i:int = 0; i < current_room.items.length; i++)
 			{
-				for each (var item:Item in current_room.items)
-				{
-					if (player.overlaps(item))
-						trace("yaaaay");
+				var considered_item:Item = (Item)(current_room.items.getItemAt(i));
+				if (player.overlaps(considered_item)) {
+					overAnItem = true;
+					expression_display.text = considered_item.toString();
 				}
 			}
-*/
+			
+			if (!overAnItem)
+				expression_display.text = "Expressions go here";
+
+			
+			if (FlxG.keys.SPACE)
+			{
+				for (var i:int = 0; i < current_room.items.length; i++)
+				{
+					var considered_item = (Item)(current_room.items.getItemAt(i));
+					if (player.overlaps(considered_item))
+						trace("insert item description");
+				}
+			}
+
 			/*
 			if (FlxG.overlap(player, floor.stairGroup))
 			{

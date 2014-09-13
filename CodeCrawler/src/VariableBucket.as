@@ -6,7 +6,7 @@ package
 	 */
 	public class VariableBucket extends Item
 	{
-		[Embed (source = "../assets/gfx/DOCSprite.png")] private static var sprite:Class;
+		[Embed (source = "../assets/gfx/bucket.png")] private static var sprite:Class;
 		
 		public var name:String;
 		public var value:Constant;
