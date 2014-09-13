@@ -10,6 +10,7 @@ package
 		
 		public var name:String;
 		public var value:Constant;
+		public var ParameterDoor:Door;
 		
 		public function VariableBucket(name:String, value:Constant, x:int, y:int) {
 			super(x, y);
@@ -20,6 +21,10 @@ package
 		
 		public function isEmpty():Boolean {
 			return this.value == null;
+		}
+		
+		public function makeParameter(targetDoor:Door):void {
+			ParameterDoor = targetDoor;
 		}
 		
 		override public function getDescription():String {
@@ -46,8 +51,24 @@ package
 		
 		override public function doAction(player:Player, room:Room):void
 		{
-			player.variable_list.addItem(this);
-			this.visible = false;
+			if (ParameterDoor == null)
+			{
+				player.variable_list.addItem(this);
+				this.visible = false;
+				room.items.removeItem(this);
+			}
+			else
+			{
+				if (player.constant_list.length != 0)
+				{
+					var TransferedBucket:VariableBucket = (VariableBucket)(this.cloneAt(100, 100));
+					TransferedBucket.ParameterDoor = null;
+					TransferedBucket.value = (Constant)(player.constant_list.removeItemAt(0));
+					ParameterDoor.linked_room_layout.addTemplateItem(TransferedBucket);
+					ParameterDoor.linked_room = ParameterDoor.linked_room_layout.generateRoom(TransferedBucket.value, room);
+					ParameterDoor.doAction(player,room);
+				}
+			}
 			room.items.removeItem(this);
 			this.kill();
 		}

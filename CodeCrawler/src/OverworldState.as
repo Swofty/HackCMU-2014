@@ -43,6 +43,8 @@ package
 		private var code_display:FlxText;
 		private var code_tracker:FlxSprite;
 		
+		private var fib:RoomLayout;
+		
 		override public function create():void 
 		{	
 			//****MUSIC AND SFX******************************
@@ -58,11 +60,14 @@ package
 			
 			player = new Player(100, 100);
 			
+			fib = new RoomLayout("fib");
+			fib.addParam("x");
+			
 			var c:Constant = new Constant("int", 5, 1 * TILEWIDTH, 1 * TILEHEIGHT);
-			room_layout_list.addItem(new RoomLayout("fib"));
+			room_layout_list.addItem(fib);
 			current_room = (RoomLayout)(room_layout_list.getItemAt(0)).generateRoom(c, null);
 			current_room.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);	
-			current_room.instantiateTemplateItem(new Door(new RoomLayout("fib"),-1, -1));
+			current_room.instantiateTemplateItem(new Door(fib,-1, -1));
 			add(current_room);
 			
 			for (var i:int = 0; i < current_room.items.length; i++)
@@ -101,10 +106,42 @@ package
 		}
 		override public function update():void 
 		{
+			var considered_item:Item;
 			if (player.x < 0) {
 				/*copy this code into all of the other checks for each door*/
 				for (i = 0; i < current_room.items.length; i++)
 				{
+					considered_item = current_room.items.getItemAt(i) as Item;
+					if (considered_item is Door)
+					{
+						var considered_door:Door = (Door)(current_room.items.getItemAt(i));
+						if (considered_door.associated_wall == Room.LEFT) 
+						{
+							if (considered_door.door_type == Door.RETURN) 
+							{
+								if (current_room.parent_room == null) 
+								{
+									FlxG.switchState(new VictoryState((Item)(player.constant_list.getItemAt(0)).getDescription()));
+									return;
+								}
+								current_room = current_room.parent_room;
+							}
+							else
+							{
+								current_room = considered_door.linked_room;
+								break;
+							}
+						}
+					}
+				}
+				player.x = 800 - 2*TILEWIDTH;
+				return;
+			}
+			if (player.x > 800 - player.height) {
+				/*copy this code into all of the other checks for each door*/
+				for (i = 0; i < current_room.items.length; i++)
+				{
+					considered_item = current_room.items.getItemAt(i) as Item;
 					if (considered_item is Door)
 					{
 						var considered_door:Door = (Door)(current_room.items.getItemAt(i));
@@ -120,29 +157,75 @@ package
 								current_room = current_room.parent_room;
 							}
 							else
-							{
-								if (considered_door.linked_room == null)
-									current_room = considered_door.linked_room_layout.generateRoom
-											((Constant)(player.constant_list.getItemAt(0)), current_room);
-								else
-									current_room = considered_door.linked_room;
+							{	
+								current_room = considered_door.linked_room;
+								break;
 							}
 						}
 					}
 				}
-				player.x = 800 - player.height;
-			}
-			if (player.x > 800 - player.height) {
-				
-				player.x = 0;
+				player.x = 0+TILEWIDTH;
+				return;
 			}
 			if (player.y < 0) {
-				
-				player.y = 600 - player.width;
+				/*copy this code into all of the other checks for each door*/
+				for (i = 0; i < current_room.items.length; i++)
+				{
+					considered_item = current_room.items.getItemAt(i) as Item;
+					if (considered_item is Door)
+					{
+						var considered_door:Door = (Door)(current_room.items.getItemAt(i));
+						if (considered_door.associated_wall == Room.TOP) 
+						{
+							if (considered_door.door_type == Door.RETURN) 
+							{
+								if (current_room.parent_room == null) 
+								{
+									FlxG.switchState(new VictoryState((Item)(player.constant_list.getItemAt(0)).getDescription()));
+									return;
+								}
+								current_room = current_room.parent_room;
+							}
+							else
+							{
+								current_room = considered_door.linked_room;
+								break;
+							}
+						}
+					}
+				}
+				player.y = 600 - 2*TILEHEIGHT;
+				return;
 			}
 			if (player.y > 600 - player.height) {
-				
-				player.y = 0;
+				/*copy this code into all of the other checks for each door*/
+				for (i = 0; i < current_room.items.length; i++)
+				{
+					considered_item = current_room.items.getItemAt(i) as Item;
+					if (considered_item is Door)
+					{
+						var considered_door:Door = (Door)(current_room.items.getItemAt(i));
+						if (considered_door.associated_wall == Room.BOTTOM) 
+						{
+							if (considered_door.door_type == Door.RETURN) 
+							{
+								if (current_room.parent_room == null) 
+								{
+									FlxG.switchState(new VictoryState((Item)(player.constant_list.getItemAt(0)).getDescription()));
+									return;
+								}
+								current_room = current_room.parent_room;
+							}
+							else
+							{
+								current_room = considered_door.linked_room;
+								break;
+							}
+						}
+					}
+				}
+				player.y = 0+TILEHEIGHT;
+				return;
 			}
 			//This stuff collides the player with the map, it smooths edges to stop annoying derpy things. 
 			if (FlxG.collide(player, current_room))
@@ -202,13 +285,12 @@ package
 			
 			
 			expression_display.text = "Current Expression: \n"
-			var considered_item:Item;
 			for (i = 0; i < current_room.items.length; i++)
 			{
 				considered_item = (Item)(current_room.items.getItemAt(i));
 				if (!(considered_item is Door))
 				{
-					if (player.overlaps(considered_item)) {
+					if (considered_item != null && player.overlaps(considered_item)) {
 						expression_display.text += considered_item.getDescription();
 					}
 				}
@@ -228,11 +310,6 @@ package
 					if (!(considered_item is Door))
 					{
 						if (player.overlaps(considered_item))
-							considered_item.doAction(player, current_room);
-					}
-					else
-					{
-						if (FlxG.collide(player, considered_item))
 							considered_item.doAction(player, current_room);
 					}
 				}
