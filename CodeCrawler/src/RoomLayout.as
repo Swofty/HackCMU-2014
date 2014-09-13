@@ -12,11 +12,11 @@ package
 	public class RoomLayout
 	{
 		public var template_items:ArrayList;
-		public var name:String;
+		public var layout_name:String;
 		
 		public function RoomLayout(function_name:String) {
 			template_items = new ArrayList();
-			name = function_name;
+			layout_name = function_name;
 		}
 		
 		/**

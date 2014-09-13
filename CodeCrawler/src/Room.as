@@ -1,4 +1,5 @@
-package src {
+package
+{
 	import org.flixel.FlxTilemap;
 	import mx.collections.ArrayList;
 	/**
@@ -9,14 +10,21 @@ package src {
 	{
 		public var items:ArrayList;
 		
+		/** String of the function call with arg */
+		public var room_title:String; 
+		
 		/**
-		 * Creates a room modeling after a function call with argument arg
+		 * Creates a room modeling after a function call with argument arg.
+		 * TODO: Add EntryDoor into the function room
+		 * TODO: Add VariableBucket for the arg next to the door
+		 * TODO: Create the title
 		 * @param	arg
 		 * @param	parent
 		 */
-		public function Room(arg:Item, parent:Room)
+		public function Room(arg:Constant, parent:Room, function_name:String)
 		{
 			this.items = new ArrayList();
+			this.room_title = function_name + "(" + arg + ")";
 			
 			// Adds door for entrance
 			// this.addItem(new EntryDoor(parent, x, y))
@@ -33,7 +41,7 @@ package src {
 			return int(Math.random() * this.widthInTiles) * this._tileWidth;
 		}
 		
-		public function findFreeY(item:Item):Item {
+		public function findFreeY(item:Item):int {
 			return int(Math.random() * this.heightInTiles) * this._tileWidth;
 		}
 	}
