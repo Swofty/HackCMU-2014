@@ -47,7 +47,7 @@ package
 			this.door_type = FUNCTION;
 			this.linked_room = null;
 			this.parent_room = null;
-			this.associated_wall = null;
+			this.associated_wall = Room.TOP;
 			this.associated_buckets = null;
 		}
 		
