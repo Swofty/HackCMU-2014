@@ -59,8 +59,8 @@ package
 				}
 			}
 			else {
-				var spawn_x:int = this.findFreeX(template_item);
-				var spawn_y:int = this.findFreeY(template_item);
+				var spawn_x:int = 100;//this.findFreeX(template_item);
+				var spawn_y:int = 100;//this.findFreeY(template_item);
 				var real_item:Item = template_item.cloneAt(spawn_x, spawn_y);
 				items.addItem(real_item);
 			}
@@ -135,7 +135,7 @@ package
 		}
 		
 		public function findFreeX(item:Item):int {
-			return int(Math.random() * this.widthInTiles) * this._tileWidth;
+			return (int) (Math.random() * this.widthInTiles) * this._tileWidth;
 		}
 		
 		public function findFreeY(item:Item):int {

@@ -134,10 +134,11 @@ package
 						}
 					}
 				}
-				player.x = 800 - 2*TILEWIDTH;
+				player.x = 800 - 2 * TILEWIDTH;
+				instantiateRoom(current_room);
 				return;
 			}
-			if (player.x > 800 - player.height) {
+			else if (player.x > 800 - player.height) {
 				/*copy this code into all of the other checks for each door*/
 				for (i = 0; i < current_room.items.length; i++)
 				{
@@ -164,10 +165,11 @@ package
 						}
 					}
 				}
-				player.x = 0+TILEWIDTH;
+				player.x = 0 + TILEWIDTH;
+				instantiateRoom(current_room);
 				return;
 			}
-			if (player.y < 0) {
+			else if (player.y < 0) {
 				/*copy this code into all of the other checks for each door*/
 				for (i = 0; i < current_room.items.length; i++)
 				{
@@ -194,10 +196,11 @@ package
 						}
 					}
 				}
-				player.y = 600 - 2*TILEHEIGHT;
+				player.y = 600 - 2 * TILEHEIGHT;
+				instantiateRoom(current_room);
 				return;
 			}
-			if (player.y > 600 - player.height) {
+			else if (player.y > 600 - player.height) {
 				/*copy this code into all of the other checks for each door*/
 				for (i = 0; i < current_room.items.length; i++)
 				{
@@ -224,7 +227,8 @@ package
 						}
 					}
 				}
-				player.y = 0+TILEHEIGHT;
+				player.y = 0 + TILEHEIGHT;
+				instantiateRoom(current_room);
 				return;
 			}
 			//This stuff collides the player with the map, it smooths edges to stop annoying derpy things. 
@@ -356,169 +360,15 @@ package
 			super.update();
 		}
 		
-		
-		//This function will take our spec and generates and array that stores all of our .txt files
-		//These .txt files are the floors of our dungeons.
-		/*
-		public function generateMaps():void
+		public function instantiateRoom(current_room:Room):void
 		{
-			var myMapSpec:String = spec;
-			var floornumber:int = parseInt(myMapSpec.substring(0, myMapSpec.indexOf('\n')));//this holds the total number of floors
-			floorArray = new Array(floornumber);												//this holds all of the Floors.
-
-			myMapSpec = myMapSpec.substring(myMapSpec.indexOf('\n') + 1);
+			current_room.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);	
+			add(current_room);
 			
-			for (var j:int = 0; j < floornumber; j++)
+			for (var i:int = 0; i < current_room.items.length; i++)
 			{
-				floor = new Floor();
-				floorArray[j] = floor;
-				
-				myMapSpec = myMapSpec.substring(myMapSpec.indexOf(' ') + 1);
-				//this code will get us the floor that precedes each floor if applicable.
-				floor.name = myMapSpec.substring(0, myMapSpec.indexOf(' '));
-				myMapSpec = myMapSpec.substring(myMapSpec.indexOf(' ') + 1);
-				
-				floor.parentname= myMapSpec.substring(0, myMapSpec.indexOf(' '));
-				myMapSpec = myMapSpec.substring(myMapSpec.indexOf(' ') + 1);		
-				
-				floor.files = parseInt(myMapSpec.substring(0, myMapSpec.indexOf(' ')));
-				myMapSpec = myMapSpec.substring(myMapSpec.indexOf(' ') + 1);
-				
-				floor.subdirectories = parseInt(myMapSpec.substring(0, myMapSpec.indexOf('\n')));
-				myMapSpec = myMapSpec.substring(myMapSpec.indexOf('\n') + 1);
+				add((Item)(current_room.items.getItemAt(i)));
 			}
-			myMapSpec = myMapSpec.substring(myMapSpec.indexOf(';')+2);
-			
-			for (var i:int = 0; i < floornumber; i++)
-			{
-				//this code will get us the actual data about the floor and make it.
-				mapdata = myMapSpec.substring(0, myMapSpec.indexOf('\n\n\n'));
-				map = new FlxTilemap();
-				map.loadMap(mapdata, Tiles, TILEWIDTH, TILEHEIGHT);
-				
-				floorArray[i].map = map;
-				
-				myMapSpec = myMapSpec.substring(myMapSpec.indexOf('\n\n\n')+3);
-			}
-			
-			
-			generateStairs();
-			this.floor = floorArray[0];
-			add(this.floor.map);
-			add(this.floor.stairGroup);
 		}
-		*/
-		/*
-		public function generateStairs():void
-		{
-			for (var i: int = 0; i < floorArray.length; i++)
-			{
-				var a:Floor = floorArray[i]
-				for (var j: int = 0; j < i; j++)
-				{
-					var b:Floor = floorArray[j]
-					if (b.parentname == a.name || a.parentname == b.name)
-					{
-						var parent:Floor;
-						var child:Floor;
-						if (b.parentname == a.name)
-						{
-							parent = a;
-							child = b;
-						}
-						else //if (a.parentname == b.name)
-						{
-							parent = b;
-							child = a;
-						}
-					
-						//This takes care of the descending staircases
-						var stairpoint:FlxPoint = findStairs(parent.map);
-						var stair:Stairs = new Stairs(stairpoint.x, stairpoint.y, true, parent, child);
-						parent.stairGroup.add(stair);
-
-						//This takes care of the ascending staircases
-						stairpoint = findStairs(child.map);
-						stair = new Stairs(stairpoint.x, stairpoint.y, false, parent, child);
-						child.stairGroup.add(stair);
-					}
-				}
-			}
-			return;
-		}
-		*/
-		/*
-		public function generateEnemies():void
-		{
-			var width:int = floor.map.widthInTiles;
-			var height:int = floor.map.heightInTiles;
-			
-			var width_by_room:int = width / 18; 
-			var height_by_room:int = height / 12; 
-			
-			for (var i:int = 0; i < width_by_room; i++)
-			{
-				for (var j:int = 0; j < height_by_room; j++)
-				{
-					var makeAnEnemy:Boolean = true;
-					for each (var stair:Stairs in floor.stairGroup.members)
-					{
-						if ((i * 900 < stair.x && stair.x < (i + 1) * 900 && j * 600 < stair.y && stair.y < (j + 1) * 600) 
-						&& floor.map.getTile(i*18,j*12) != 9)
-						{
-							 makeAnEnemy = false;
-						}
-					}
-					if (makeAnEnemy)
-					{
-						if (Math.random() > 0.5)
-						{
-							var newEnemy:Enemy = new Enemy(i * 900 + 300, j * 600 + 200, "DOC", "BoB", 400);
-							add(newEnemy.myName);
-							enemyGroup.add(newEnemy);
-						}	
-						else
-						{
-							var newEnemy:Enemy = new Enemy(i * 900 + 300, j * 600 + 400, "PDF", "DENNY", 400);
-							add(newEnemy.myName);
-							enemyGroup.add(newEnemy);
-						}	
-					}
-					
-				}
-			}
-			add(enemyGroup);
-		}
-		*/
-		/*
-		//This function will load a map and insert the appropriate stairs
-		public function loadMap(floorChange:Floor):void
-		{
-			remove(this.floor.stairGroup);
-			remove(this.floor.map);
-			this.floor = floorChange;
-			add(floor.map);
-			add(floor.stairGroup);
-		}
-		*/
-		//This function will look for stais, designated by the tile 2
-		//We know there must be a stair here
-		/*
-		public function findStairs(floormap:FlxTilemap):FlxPoint
-		{
-			for (var i:int = 0; i < floormap.widthInTiles; i++)
-			{
-				for (var j:int = 0; j < floormap.heightInTiles; j++)
-				{
-					if (floormap.getTile(i, j) == 2)
-					{
-						floormap.setTile(i, j, 0);
-						return new FlxPoint(i * 50, j * 50);
-					}
-				}
-			}
-			return new FlxPoint( -1000, -1000);
-		}
-		*/
 	}	
 }

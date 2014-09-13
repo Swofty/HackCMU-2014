@@ -64,8 +64,9 @@ package
 					var TransferedBucket:VariableBucket = (VariableBucket)(this.cloneAt(100, 100));
 					TransferedBucket.ParameterDoor = null;
 					TransferedBucket.value = (Constant)(player.constant_list.removeItemAt(0));
-					ParameterDoor.linked_room_layout.addTemplateItem(TransferedBucket);
 					ParameterDoor.linked_room = ParameterDoor.linked_room_layout.generateRoom(TransferedBucket.value, room);
+					ParameterDoor.linked_room.instantiateTemplateItem(TransferedBucket);
+					
 					ParameterDoor.doAction(player,room);
 				}
 			}
