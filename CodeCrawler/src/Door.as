@@ -10,6 +10,7 @@ package
 		[Embed(source = "../assets/gfx/DownStairs.png")] private static var Placeholder_Sprite3:Class;
 
 		//2 sprites which indicate if a door is opened or closed
+		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Entry_Door:Class;
 		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Locked_Door:Class;
 		[Embed(source = "../assets/gfx/UpStairs.png")] private static var Opened_Door:Class;
 				

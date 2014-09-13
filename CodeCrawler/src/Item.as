@@ -20,7 +20,7 @@ package
 			return "Generic item";
 		}
 		
-		public function cloneAt(new_x, new_y) : Item {
+		public function cloneAt(new_x:int, new_y:int) : Item {
 			return new Item(new_x, new_y);
 		}
 	}

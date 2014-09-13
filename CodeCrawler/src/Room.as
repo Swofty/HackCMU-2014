@@ -1,4 +1,5 @@
-package src {
+package 
+{
 	import org.flixel.FlxTilemap;
 	import mx.collections.ArrayList;
 	/**
@@ -33,8 +34,8 @@ package src {
 			return int(Math.random() * this.widthInTiles) * this._tileWidth;
 		}
 		
-		public function findFreeY(item:Item):Item {
-			return int(Math.random() * this.heightInTiles) * this._tileWidth;
+		public function findFreeY(item:Item):int {
+			return (int)(Math.random() * this.heightInTiles) * this._tileWidth;
 		}
 	}
 
