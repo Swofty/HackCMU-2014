@@ -32,9 +32,42 @@ package
 		
 		override public function doAction(player:Player, room:Room):void
 		{
-			player.constant_list.addItem(this);
-			this.visible = false;
-			room.items.removeItem(this);
+			var restore_variable_list:ArrayList = player.variable_list
+			var restore_constant_list:ArrayList = player.constant_list
+						
+			var truth_value:Boolean;
+			if (this.operator.arg1_type == "Variable" && this.operator.arg2_type == "Variable")
+				truth_value = this.operator.applied_fun(player.variable_list.removeItemAt(0), player.variable_list.removeItemAt(0));
+			else if (this.operator.arg1_type == "Variable" && this.operator.arg2_type == "Constant")
+				truth_value = this.operator.applied_fun(player.variable_list.removeItemAt(0), player.constant_list.removeItemAt(0));
+			else if (this.operator.arg1_type == "Constant" && this.operator.arg2_type == "Variable")
+				truth_value = this.operator.applied_fun(player.variable_list.removeItemAt(0), player.constant_list.removeItemAt(0));
+			else if (this.operator.arg1_type == "Constant" && this.operator.arg2_type == "Constant")
+				truth_value = this.operator.applied_fun(player.variable_list.removeItemAt(0), player.constant_list.removeItemAt(0));
+
+			else if (this.operator.arg1_type == "Variable" && this.operator.arg2_type == "Prebaked")
+				truth_value = this.operator.applied_fun(player.variable_list.removeItemAt(0));
+			else if (this.operator.arg1_type == "Constand" && this.operator.arg2_type == "Prebaked")
+				truth_value = this.operator.applied_fun(player.constant_list.removeItemAt(0));
+			else if (this.operator.arg1_type == "Prebaked" && this.operator.arg2_type == "Variable")
+				truth_value = this.operator.applied_fun(player.variable_list.removeItemAt(0));
+			else if (this.operator.arg1_type == "Prebaked" && this.operator.arg2_type == "Constant")
+				truth_value = this.operator.applied_fun(player.constant_list.removeItemAt(0));
+			else if (this.operator.arg1_type == "Prebaked" && this.operator.arg2_type == "Prebaked")
+				truth_value = this.operator.applied_fun();
+			else
+				truth_value = false;
+				
+			if (truth_value) {
+				for (var i:int = 0; i < this.true_results.length; i++)
+					room.instantiateTemplateItem((Item)(this.true_results.getItemAt(i)));
+			}
+			else {
+				player.constant_list = restore_constant_list;
+				player.variable_list = restore_variable_list;
+				for (var i:int = 0; i < this.false_results.length; i++)
+					room.instantiateTemplateItem((Item)(this.false_results.getItemAt(i)));
+			}
 			this.kill();
 		}
 		

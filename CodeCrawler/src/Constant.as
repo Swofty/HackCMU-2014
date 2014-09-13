@@ -36,10 +36,12 @@ package
 		
 		override public function toString():String {
 			var value_string:String;
-			if (type == "string") {
+			if (type == "string") 
+			{
 				value_string = "\"" + this.value + "\"";
 			}
-			else {
+			else 
+			{
 				value_string = this.value;
 			}
 			return value_string + " : " + this.type;

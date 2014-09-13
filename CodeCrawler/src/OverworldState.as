@@ -59,53 +59,21 @@ package
 			player = new Player(100, 100);
 			
 			var c:Constant = new Constant("int", 5, 1 * TILEWIDTH, 1 * TILEHEIGHT);
-
 			room_layout_list.addItem(new RoomLayout("fib"));
 			current_room = (RoomLayout)(room_layout_list.getItemAt(0)).generateRoom(c, null);
-			current_room.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);
-			
+			current_room.loadMap(new map_data, Floor_Tiles, TILEWIDTH, TILEHEIGHT);			
 			add(current_room);
 			
-			//add((Item)(current_room.items.getItemAt(0)));
 			for (var i:int = 0; i < current_room.items.length; i++)
 			{
-				trace("hellO");
 				add((Item)(current_room.items.getItemAt(i)));
 			}
 			
-			//generateMaps();	//This function will be used to generate an array of all maps we will use.
-			/*
-			while ((floor.map.getTile((player.x + TILEWIDTH) / TILEWIDTH, (player.y)/ TILEHEIGHT) != 0))
-			{
-				if (player.x+ 900 < floor.map.width)
-				{
-					player.x += 900;
-				}
-				else
-				{
-					player.x = 100;
-					player.y += 600;
-				}
-			}
-			*/
 			add(player);
 			
-			/*
-			//*********Generate enemies**********************
-			//generateEnemies();
-			
-			//*********Sets world bounds*********************
-			FlxG.worldBounds = new FlxRect(0, 0, floor.map.width, floor.map.height);
-			
-			//********Camer Initialization*******************
-			FlxG.camera.width = 800;
-			FlxG.camera.height = 600;
-			FlxG.camera.setBounds(0, 0, floor.map.width, floor.map.height);
-			FlxG.camera.follow(player, FlxCamera.STYLE_TOPDOWN);
-			*/
-			
-			room_title = new FlxText(player.x-100, player.y-10, 200, "hello title!")//floorArray[0].name)
-			add(room_title);
+			room_title = new FlxText(200, 250,600, "room title!")//floorArray[0].name)
+			room_title.size = room_title.size*3;
+
 			
 			variable_display = new FlxText(0, 600, 200, "variables!")//floorArray[0].name)
 			variable_display.size = 2 * variable_display.size;
@@ -121,6 +89,7 @@ package
 			code_tracker.width = 400;
 			code_tracker.alpha = 0.5;
 			
+			add(room_title);
 			add(variable_display);
 			add(constant_display);
 			add(expression_display);
@@ -131,10 +100,26 @@ package
 		}
 		override public function update():void 
 		{
-/*			room_title.text = floorArray[floorArray.indexOf(floor)].name;
-			room_title.x = player.x;
-			room_title.y = player.y - 30;
-			*/
+			if (player.x < 0) {
+				if (current_room.parent_room == null) {
+					FlxG.switchState(new VictoryState((Item)(player.constant_list.getItemAt(0)).getDescription()));
+					return;
+				}
+				current_room = current_room.parent_room;
+				player.x = 800 - player.height;
+			}
+			if (player.x > 800 - player.height) {
+				
+				player.x = 0;
+			}
+			if (player.y < 0) {
+				
+				player.y = 600 - player.width;
+			}
+			if (player.y > 600 - player.height) {
+				
+				player.y = 0;
+			}
 			//This stuff collides the player with the map, it smooths edges to stop annoying derpy things. 
 			if (FlxG.collide(player, current_room))
 			{
@@ -176,17 +161,19 @@ package
 					}
 			}
 
+			room_title.text = "Welcome to room " + current_room.room_title;
+			
 			var i:int = 0;
 			constant_display.text = "Constants: \n";
 			for (i= 0; i < player.constant_list.length; i++)
 			{
-				constant_display.text += (Item)(player.constant_list.getItemAt(i)).toString() + "\n";
+				constant_display.text += (Item)(player.constant_list.getItemAt(i)).getDescription() + "\n";
 			}
 			
 			variable_display.text = "Variables: \n";
 			for (i = 0; i < player.variable_list.length; i++)
 			{
-				variable_display.text += (Item)(player.variable_list.getItemAt(i)).toString() + "\n";	
+				variable_display.text += (Item)(player.variable_list.getItemAt(i)).getDescription() + "\n";	
 			}
 			
 			
@@ -196,7 +183,7 @@ package
 			{
 				considered_item = (Item)(current_room.items.getItemAt(i));
 				if (player.overlaps(considered_item)) {
-					expression_display.text += considered_item.toString();
+					expression_display.text += considered_item.getDescription();
 				}
 			}			
 			

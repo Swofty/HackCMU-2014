@@ -40,9 +40,7 @@ package
 		public function Room(arg:Constant, parent:Room, function_name:String)
 		{
 			this.items = new ArrayList();
-			trace(this.items.length);
 			this.items.addItem(arg);
-			trace(this.items.length);
 			
 			this.room_title = function_name + "(" + arg + ")";
 			this.parent_room = parent;
@@ -82,7 +80,7 @@ package
 		 * its associated_parent specified to be the current Room.
 		 * @param	template_door the template function door to create and instance of
 		 */
-		public function createFunctionDoorSet(template_door:Door):void {
+		private function createFunctionDoorSet(template_door:Door):void {
 			var door_x:int = 0; // TODO
 			var door_y:int = 0; // TODO
 			var wall:int = TOP; // TODO
